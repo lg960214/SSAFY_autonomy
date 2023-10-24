@@ -1,0 +1,18 @@
+#!/bin/sh
+
+
+staged_files=$(git diff --cached --name-only)
+current_dir=$(pwd)
+
+echo "$current_dir\n"
+
+for file in $staged_files
+do
+    echo "Staged file: $file"
+    if [[ $file == *.c || $file == *.cpp ]]; then
+        # If it does, echo "Hi"
+        echo "Hi"
+    fi
+done
+
+# exit 1
