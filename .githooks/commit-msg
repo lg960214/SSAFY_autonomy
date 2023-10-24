@@ -1,47 +1,43 @@
 #!/bin/bash
 
-COMMIT_CONVENTION_REGEX="^feature/.*$"
-FEATURE_BRANCH_REGEX="^feature/([a-zA-Z]+)-([0-9]+)$"
+FEATURE_BRANCH_REGEX="^feature/([a-zA-Z0-9]+)-([0-9]+)$"
+COMMIT_CONVENTION_REGEX="^.*:.*$"
 
 check_commit_convention() {
-
     commit_msg_file="$1"
     commit_msg=$(cat "$commit_msg_file")
 
     branch_name=$(git rev-parse --abbrev-ref HEAD)
 
-    if [[ $branch_name =~ $COMMIT_CONVENTION_REGEX ]]; then
-        if ! [[ $commit_msg =~ $FEATURE_BRANCH_REGEX ]]; then
-            echo -e "\nError : 커밋 메세지 형식을 지켜주세요.\n\n============================\n커밋 컨벤션 - {Gitmoji} : {커밋 내용}\n주어진 내용 : $commit_msg\n==========================="
+    if [[ $branch_name =~ $FEATURE_BRANCH_REGEX ]]; then
+        if ! [[ $commit_msg =~ $COMMIT_CONVENTION_REGEX ]]; then
+            echo -e "\nError : 커밋 메세지 형식을 지켜주세요.\n\n============================\n커밋 컨벤션 | {Gitmoji}:{커밋 내용}\n주어진 내용 : $commit_msg\n==========================="
             exit 1
         else
             # issue 삽입
             echo -e "\n============================\nCommit Convention 검사 완료!\n============================"
-            echo -e "\n============================\nJira Issue Ticket 생성 중...\n\n"
+            echo -e "============================\nJira Issue Ticket 생성 중...\n\n"
+            
+            jira_ticket=$(echo "$branch_name" | sed -n 's/feature\/\([0-9a-zA-Z]*\)/\1/p')
 
-            if [[ $branch_name == feature/* ]]; then
-                jira_ticket=$(echo "$branch_name" | sed -n 's/feature\/\([0-9a-zA-Z]*\)/\1/p')
+            if [ -z "$jira_ticket" ]; then
+                echo "Error: Could not extract issue number from branch name.\n============================"
+                exit 1
+            else
+                # Append the extracted issue numbers to the commit message
+                commit_msg="[#$jira_ticket] $commit_msg"
 
-                if [ -z "$jira_ticket" ]; then
-                    echo "Error: Could not extract issue number from branch name.\n============================"
-                    exit 1
-                else
-                    # Append the extracted issue numbers to the commit message
-                    commit_msg="$commit_msg (#$jira_ticket)"
+                # Replace the existing commit message with the new one
+                echo "$commit_msg" > "$commit_msg_file"
 
-                    # Replace the existing commit message with the new one
-                    echo "$commit_msg" > "$commit_msg_file"
-
-                    echo -e "Jira Issue Ticket 생성 완료!\n==========================="
-                fi
+                echo -e "Jira Issue Ticket 생성 완료!\n==========================="
             fi
-        else
-            echo -e "Jira Issue Ticket 생성 불가\nBranch_name: $branch_name\n===========================\n"
-            exit 1
         fi
     else
         echo -e "\nSkipping commit convention check for branch: $branch_name\n============================"
-    if
+    fi
+
+    echo -e "$commit_msg"
 }
 
 commit_msg_file="$1"

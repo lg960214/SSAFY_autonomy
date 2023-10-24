@@ -28,4 +28,4 @@ done
 
 echo -e "============================\n[Code Linter] : Code Convention 검사 완료!\n============================\n"
 
-exit 1
+exit 0
