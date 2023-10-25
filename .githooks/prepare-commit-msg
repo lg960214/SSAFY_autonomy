@@ -1,0 +1,31 @@
+#!/bin/sh
+
+
+staged_files=$(git diff --cached --name-only)
+current_dir=$(pwd)
+
+echo -e "\n============================\n[Code Linter] : Code Convention 검사중...\n============================"
+
+for file in $staged_files
+do
+    if [[ $file == *.c || $file == *.cpp ]]; then
+        
+        script_output=$(python "$current_dir/.githooks/cpptest.py" --verbose="0" --filter="-legal/copyright" "$file" | tail -n 1)
+
+        echo "$script_output"
+        
+        if [[ $script_output == *:* ]]; then
+            total_errors=$(($total_errors + ${script_output##*: }))
+            echo -e "============================\n[Code Linter] : CPP Convention 검사 완료! 해당 오류를 수정해주세요\n============================"
+            exit 1
+        else
+            echo -e "[Code Linter] : Code Convention 검사 통과 - \"$file\""
+        fi
+    elif [ $file == *.py ]; then
+        echo "test"
+    fi
+done
+
+echo -e "============================\n[Code Linter] : Code Convention 검사 완료!\n============================\n"
+
+exit 0
