@@ -110,6 +110,7 @@ chip::Credentials::DeviceAttestationCredentialsProvider * get_dac_provider(void)
 static void InitServer(intptr_t context)
 {
     // Print QR Code URL
+    ESP_LOGE(TAG, "@@@@@ START InitServer in Main");
     PrintOnboardingCodes(chip::RendezvousInformationFlags(CONFIG_RENDEZVOUS_MODE));
 
     DeviceCallbacksDelegate::Instance().SetAppDelegate(&sAppDeviceCallbacksDelegate);
@@ -130,11 +131,13 @@ static void InitServer(intptr_t context)
     static Tracing::Insights::ESP32Backend backend;
     Tracing::Register(backend);
 #endif
+    ESP_LOGE(TAG, "@@@@@ END InitServer in Main");
 }
 
 extern "C" void app_main()
 {
     // Initialize the ESP NVS layer.
+    ESP_LOGE(TAG, "@@@@@ START app_main in Main");
     esp_err_t err = nvs_flash_init();
     if (err != ESP_OK)
     {
@@ -193,4 +196,5 @@ extern "C" void app_main()
     {
         ESP_LOGE(TAG, "GetAppTask().StartAppTask() failed : %s", ErrorStr(error));
     }
+    ESP_LOGE(TAG, "@@@@@ END app_main in Main");
 }

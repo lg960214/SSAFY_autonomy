@@ -54,6 +54,7 @@ color_t qrCodeColor = TFT_LIGHTGREY;
 
 QRCodeScreen::QRCodeScreen(std::string text, std::string title) : title(title)
 {
+    ESP_LOGE(TAG, "@@@@@ START QRCodeScreen::QRCodeScreen");
     constexpr int qrCodeSize = qrcodegen_BUFFER_LEN_FOR_VERSION(kVersion);
 
     // TODO check text length against max size permitted, or maybe adjust version used accordingly
@@ -67,10 +68,12 @@ QRCodeScreen::QRCodeScreen(std::string text, std::string title) : title(title)
         ESP_LOGE("QRCodeScreen", "qrcodegen_encodeText() failed");
         qrCode.clear();
     }
+    ESP_LOGE(TAG, "@@@@@ END QRCodeScreen::QRCodeScreen");
 }
 
 void QRCodeScreen::Display()
 {
+    ESP_LOGE(TAG, "@@@@@ START QRCodeScreen::Display");
     if (qrCode.empty())
     {
         return;
@@ -95,6 +98,7 @@ void QRCodeScreen::Display()
             }
         }
     }
+    ESP_LOGE(TAG, "@@@@@ END QRCodeScreen::Display");
 }
 
 #endif // CONFIG_HAVE_DISPLAY

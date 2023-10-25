@@ -29,7 +29,9 @@ void LEDWidget::Init(void)
     mState      = false;
     mBrightness = UINT8_MAX;
 
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::Init");
 #if CONFIG_LED_TYPE_RMT
+    ESP_LOGE(TAG, "@@@@@ LEDWidget::Init CONFIG_LED_TYPE_RMT");
     rmt_config_t config             = RMT_DEFAULT_CONFIG_TX((gpio_num_t) CONFIG_LED_GPIO, (rmt_channel_t) CONFIG_LED_RMT_CHANNEL);
     led_strip_config_t strip_config = LED_STRIP_DEFAULT_CONFIG(1, (led_strip_dev_t) config.channel);
 
@@ -61,10 +63,13 @@ void LEDWidget::Init(void)
     };
     ledc_channel_config(&ledc_channel);
 #endif // CONFIG_LED_TYPE_RMT
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::Init");
+
 }
 
 void LEDWidget::Set(bool state)
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::Set");
     ESP_LOGI(TAG, "Setting state to %d", state ? 1 : 0);
     if (state == mState)
         return;
@@ -72,18 +77,23 @@ void LEDWidget::Set(bool state)
     mState = state;
 
     DoSet();
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::Set");
+
 }
 
 void LEDWidget::Toggle()
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::Toggle");
     ESP_LOGI(TAG, "Toggling state to %d", !mState);
     mState = !mState;
 
     DoSet();
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::Toggle");
 }
 
 void LEDWidget::SetBrightness(uint8_t brightness)
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::SetBrightness");
     ESP_LOGI(TAG, "Setting brightness to %d", brightness);
     if (brightness == mBrightness)
         return;
@@ -91,21 +101,27 @@ void LEDWidget::SetBrightness(uint8_t brightness)
     mBrightness = brightness;
 
     DoSet();
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::SetBrightness");
 }
 
 uint8_t LEDWidget::GetLevel()
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::GetLevel");
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::GetLevel");
     return this->mBrightness;
 }
 
 bool LEDWidget::IsTurnedOn()
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::IsTurnedOn");
     return this->mState;
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::IsTurnedOn");
 }
 
 #if CONFIG_LED_TYPE_RMT
 void LEDWidget::SetColor(uint8_t Hue, uint8_t Saturation)
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::SetColor");
     if (Hue == mHue && Saturation == mSaturation)
         return;
 
@@ -113,14 +129,17 @@ void LEDWidget::SetColor(uint8_t Hue, uint8_t Saturation)
     mSaturation = Saturation;
 
     DoSet();
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::SetColor");
 }
 #endif // CONFIG_LED_TYPE_RMT
 
 void LEDWidget::DoSet(void)
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::DoSet");
     uint8_t brightness = mState ? mBrightness : 0;
 
 #if CONFIG_LED_TYPE_RMT
+    ESP_LOGE(TAG, "@@@@@ LEDWidget::Doset CONFIG_LED_TYPE_RMT");
     if (mStrip)
     {
         HsvColor_t hsv = { mHue, mSaturation, brightness };
@@ -129,9 +148,12 @@ void LEDWidget::DoSet(void)
         mStrip->refresh(mStrip, 100);
     }
 #else
+    ESP_LOGE(TAG, "@@@@@ LEDWidget::Doset CONFIG_LED_TYPE_RMT");
     if (mGPIONum < GPIO_NUM_MAX)
     {
+        ESP_LOGE(TAG, "@@@@@ LEDWidget::Doset ledc_set_duty call");
         ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, brightness);
+        ESP_LOGE(TAG, "@@@@@ LEDWidget::Doset ledc_update_duty call");
         ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
     }
 #endif // CONFIG_LED_TYPE_RMT
@@ -141,15 +163,18 @@ void LEDWidget::DoSet(void)
         ScreenManager::SetVLED(mVirtualLEDIndex, mState);
     }
 #endif // CONFIG_HAVE_DISPLAY
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::DoSet");
 }
 
 #if CONFIG_DEVICE_TYPE_M5STACK
 void LEDWidget::SetVLED(int id1)
 {
+    ESP_LOGE(TAG, "@@@@@ START LEDWidget::SetVLED");
     mVirtualLEDIndex = id1;
     if (mVirtualLEDIndex != -1)
     {
         ScreenManager::SetVLED(mVirtualLEDIndex, mState);
     }
+    ESP_LOGE(TAG, "@@@@@ END LEDWidget::SetVLED");
 }
 #endif

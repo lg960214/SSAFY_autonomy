@@ -32,15 +32,18 @@
 #endif
 void WiFiWidget::Init()
 {
+    ESP_LOGE(TAG, "@@@@@ START WiFiWidget::Init");
 #if CONFIG_HAVE_DISPLAY
     mVLED = -1;
 #endif // CONFIG_HAVE_DISPLAY
 
     mState = false;
+    ESP_LOGE(TAG, "@@@@@ END WiFiWidget::Init");
 }
 
 void WiFiWidget::Set(bool state)
 {
+    ESP_LOGE(TAG, "@@@@@ START WiFiWidget::Set");
     bool stateChange = (mState != state);
     mState           = state;
     if (stateChange)
@@ -52,15 +55,18 @@ void WiFiWidget::Set(bool state)
         }
 #endif // CONFIG_HAVE_DISPLAY
     }
+    ESP_LOGE(TAG, "@@@@@ START WiFiWidget::Set");
 }
 
 #if CONFIG_HAVE_DISPLAY
 void WiFiWidget::SetVLED(int id)
 {
+    ESP_LOGE(TAG, "@@@@@ START WiFiWidget::SetVLED");
     mVLED = id;
     if (mVLED != -1)
     {
         ScreenManager::SetVLED(mVLED, mState);
     }
+    ESP_LOGE(TAG, "@@@@@ START WiFiWidget::SetVLED");
 }
 #endif // CONFIG_HAVE_DISPLAY
