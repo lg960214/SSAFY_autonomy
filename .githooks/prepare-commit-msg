@@ -1,5 +1,6 @@
 #!/bin/sh
 
+exec < /dev/tty
 
 staged_files=$(git diff --cached --name-only)
 current_dir=$(pwd)
@@ -8,21 +9,41 @@ echo -e "\n============================\n[Code Linter] : Code Convention 검사�
 
 for file in $staged_files
 do
-    if [[ $file == *.c || $file == *.cpp ]]; then
-        
-        script_output=$(python "$current_dir/.githooks/cpptest.py" --verbose="0" --filter="-legal/copyright" "$file" | tail -n 1)
+    if [[ "$file" == *.c || "$file" == *.cpp ]]; then
+        script_output=$(python "$current_dir/.githooks/cpptest.py" --verbose="0" "$file" | tail -n 1)
 
         echo "$script_output"
         
-        if [[ $script_output == *:* ]]; then
-            total_errors=$(($total_errors + ${script_output##*: }))
-            echo -e "============================\n[Code Linter] : CPP Convention 검사 완료! 해당 오류를 수정해주세요\n============================"
-            exit 1
-        else
-            echo -e "[Code Linter] : Code Convention 검사 통과 - \"$file\""
-        fi
+        while true; do
+            if [[ "$script_output" == Done* ]]; then
+                echo -e "[Code Linter] : Code Convention 검사 통과 - \"$file\""
+                echo -e "============================"
+                break
+            elif [[ $script_output == *:* ]]; then
+                total_errors=$(($total_errors + ${script_output##*: }))
+                echo -e "[Code Linter] : 해당 파일의 오류를 수정하지 않고 넘기시겠습니까? ([y]/n)"
+                read user_input
+
+                if [[ "$user_input" == "Y"  || "$user_input" == "y" ]]; then
+                    echo -e "[Code Linter] : Code Convention 검사 통과 - \"$file\""
+                    echo -e "============================"
+                    break
+
+                elif [[ "$user_input" == "N" || "$user_input" == "n" ]]; then
+                    echo -e "[Code Linter] : Code Convention 검사 오류 - \"$file\""
+                    echo -e "[Code Linter] : 오류를 수정해주세요"
+                    exit 1
+                else
+                    continue;
+                fi            
+            else
+                echo -e "[Code Linter] : 오류로 인한 Code Convention 검사 통과 - \"$file\""
+                echo -e "============================"
+                break
+            fi
+        done
     elif [ $file == *.py ]; then
-        echo "test"
+        echo "등록된 Python convention이 없습니다."
     fi
 done
 
