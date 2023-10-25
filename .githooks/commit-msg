@@ -25,7 +25,7 @@ check_commit_convention() {
                 exit 1
             else
                 # Append the extracted issue numbers to the commit message
-                commit_msg="[#$jira_ticket] $commit_msg"
+                commit_msg="[$jira_ticket] $commit_msg"
 
                 # Replace the existing commit message with the new one
                 echo "$commit_msg" > "$commit_msg_file"
