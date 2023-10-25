@@ -43,27 +43,33 @@ Button::Button(gpio_num_t gpioNum)
 
 int32_t Find_Button_Via_Pin(gpio_num_t gpioNum)
 {
+	ESP_LOGE(TAG, "@@@@@ START Find_Button_Via_Pin");
     for (int i = 0; i < BUTTON_NUMBER; i++)
     {
         if (gButtons[i].GetGPIONum() == gpioNum)
         {
+			ESP_LOGE(TAG, "@@@@@ END Find_Button_Via_Pin return with i");
             return i;
         }
     }
+	ESP_LOGE(TAG, "@@@@@ END Find_Button_Via_Pin return with -1");
     return -1;
 }
 
 void IRAM_ATTR button_isr_handler(void * arg)
 {
+	ESP_LOGE(TAG, "@@@@@ START button_isr_handler"); 
     uint32_t gpio_num = (uint32_t) arg;
     int32_t idx       = Find_Button_Via_Pin((gpio_num_t) gpio_num);
     if (idx == -1)
     {
+		ESP_LOGE(TAG, "@@@@@ END button_isr_handler (idx == -1)"); 
         return;
     }
     BaseType_t taskWoken = pdFALSE;
     xTimerStartFromISR(gButtons[idx].mbuttonTimer,
                        &taskWoken); // If the timer had already been started ,restart it will reset its expiry time
+	ESP_LOGE(TAG, "@@@@@ END button_isr_handler");
 }
 
 esp_err_t Button::Init()
@@ -73,6 +79,7 @@ esp_err_t Button::Init()
 
 esp_err_t Button::Init(gpio_num_t gpioNum)
 {
+	ESP_LOGE(TAG, "@@@@@ STRT Button::Init");
     esp_err_t ret = ESP_OK;
 
     mGPIONum = gpioNum;
@@ -101,11 +108,14 @@ esp_err_t Button::Init(gpio_num_t gpioNum)
                                                         // the same timer cn function)
     );
 
+	ESP_LOGE(TAG, "@@@@@ END Button::Init with ESP_OK");
     return ESP_OK;
 }
 void Button::TimerCallback(TimerHandle_t xTimer)
 {
+	ESP_LOGE(TAG, "@@@@@ START Button::TimerCallback");
     // Get the button index of the expired timer and call button event Handler.
     uint32_t gpio_num = (uint32_t) pvTimerGetTimerID(xTimer);
     GetAppTask().ButtonEventHandler(gpio_num, APP_BUTTON_PRESSED);
+	ESP_LOGE(TAG, "@@@@@ END Button::TimerCallback"); 
 }
