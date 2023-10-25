@@ -49,6 +49,7 @@ AppTask AppTask::sAppTask;
 
 CHIP_ERROR AppTask::StartAppTask()
 {
+	ESP_LOGE(TAG, "@@@@@ START AppTask::StartAppTask");
     sAppEventQueue = xQueueCreate(APP_EVENT_QUEUE_SIZE, sizeof(AppEvent));
     if (sAppEventQueue == NULL)
     {
@@ -59,13 +60,16 @@ CHIP_ERROR AppTask::StartAppTask()
     // Start App task.
     BaseType_t xReturned;
     xReturned = xTaskCreate(AppTaskMain, APP_TASK_NAME, APP_TASK_STACK_SIZE, NULL, 1, &sAppTaskHandle);
+	ESP_LOGE(TAG, "@@@@@ END AppTask::StartAppTask"); 
     return (xReturned == pdPASS) ? CHIP_NO_ERROR : APP_ERROR_CREATE_TASK_FAILED;
 }
 
 void AppTask::ButtonEventHandler(const uint8_t buttonHandle, uint8_t btnAction)
 {
+	ESP_LOGE(TAG, "@@@@@ START ButtonEventHandler"); 
     if (btnAction != APP_BUTTON_PRESSED)
     {
+		ESP_LOGE(TAG, "@@@@@ END WITH btnAction != APP_BUTTON_PRESSED"); 
         return;
     }
 
@@ -81,6 +85,7 @@ void AppTask::ButtonEventHandler(const uint8_t buttonHandle, uint8_t btnAction)
 #endif
 
     sAppTask.PostEvent(&button_event);
+	ESP_LOGE(TAG, "@@@@@ END ButtonEventHandler"); 
 }
 
 #if CONFIG_DEVICE_TYPE_M5STACK
@@ -101,6 +106,7 @@ void AppTask::ButtonPressedAction(AppEvent * aEvent)
         // So we use 40 - io_num to map the pin number to button number
         ScreenManager::ButtonPressed(40 - io_num);
     }
+	ESP_LOGE(TAG, "@@@@@ END ButtonPressedAction");
 }
 #endif
 
@@ -121,8 +127,10 @@ CHIP_ERROR AppTask::Init()
 
 void AppTask::AppTaskMain(void * pvParameter)
 {
+	ESP_LOGE(TAG, "@@@@@ START AppTaskMain");
     AppEvent event;
     CHIP_ERROR err = sAppTask.Init();
+
     if (err != CHIP_NO_ERROR)
     {
         ESP_LOGI(TAG, "AppTask.Init() failed due to %" CHIP_ERROR_FORMAT, err.Format());
@@ -136,14 +144,18 @@ void AppTask::AppTaskMain(void * pvParameter)
         BaseType_t eventReceived = xQueueReceive(sAppEventQueue, &event, pdMS_TO_TICKS(10));
         while (eventReceived == pdTRUE)
         {
+			ESP_LOGE(TAG, "@@@@@ while eventReceived == pdTRUE");
             sAppTask.DispatchEvent(&event);
             eventReceived = xQueueReceive(sAppEventQueue, &event, 0); // return immediately if the queue is empty
+			ESP_LOGE(TAG, "@@@@@ After while eventReceived == pdTRUE");
         }
     }
+	ESP_LOGE(TAG, "@@@@@ END AppTaskMain"); 
 }
 
 void AppTask::PostEvent(const AppEvent * aEvent)
 {
+	ESP_LOGE(TAG, "@@@@@ START PostEvent");
     if (sAppEventQueue != NULL)
     {
         BaseType_t status;
@@ -163,10 +175,12 @@ void AppTask::PostEvent(const AppEvent * aEvent)
     {
         ESP_LOGE(TAG, "Event Queue is NULL should never happen");
     }
+	ESP_LOGE(TAG, "@@@@@ END PostEvent");
 }
 
 void AppTask::DispatchEvent(AppEvent * aEvent)
 {
+	ESP_LOGE(TAG, "@@@@@ START DispatchEvent");
     if (aEvent->mHandler)
     {
         aEvent->mHandler(aEvent);
@@ -175,18 +189,22 @@ void AppTask::DispatchEvent(AppEvent * aEvent)
     {
         ESP_LOGI(TAG, "Event received with no handler. Dropping event.");
     }
+	ESP_LOGE(TAG, "@@@@@ END DispatchEvent");
 }
 
 void AppTask::LightingActionEventHandler(AppEvent * aEvent)
 {
+	ESP_LOGE(TAG, "@@@@@ START LightingActionEventHandler");
     AppLED.Toggle();
     chip::DeviceLayer::PlatformMgr().LockChipStack();
     sAppTask.UpdateClusterState();
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+	ESP_LOGE(TAG, "@@@@@ END LightingActionEventHandler");
 }
 
 void AppTask::UpdateClusterState()
 {
+	ESP_LOGE(TAG, "@@@@@ START Update ClusterState"); 
     ESP_LOGI(TAG, "Writing to OnOff cluster");
     // write the new on/off value
     EmberAfStatus status = Clusters::OnOff::Attributes::OnOff::Set(kLightEndpointId, AppLED.IsTurnedOn());
@@ -203,4 +221,5 @@ void AppTask::UpdateClusterState()
     {
         ESP_LOGE(TAG, "Updating level cluster failed: %x", status);
     }
+	ESP_LOGE(TAG, "@@@@@ END UpdateClusterState");
 }

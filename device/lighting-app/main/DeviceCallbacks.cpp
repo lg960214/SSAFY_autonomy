@@ -20,6 +20,7 @@
 #include "DeviceCallbacks.h"
 #include "Globals.h"
 #include "LEDWidget.h"
+#include "esp_log.h"
 
 #include <app/util/util.h>
 
@@ -41,54 +42,66 @@ using namespace chip::app::Clusters;
 void AppDeviceCallbacks::PostAttributeChangeCallback(EndpointId endpointId, ClusterId clusterId, AttributeId attributeId,
                                                      uint8_t type, uint16_t size, uint8_t * value)
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacks::PostAttributeChangeCallback"); 
     ESP_LOGI(TAG, "PostAttributeChangeCallback - Cluster ID: '0x%" PRIx32 "', EndPoint ID: '0x%x', Attribute ID: '0x%" PRIx32 "'",
              clusterId, endpointId, attributeId);
 
     switch (clusterId)
     {
     case OnOff::Id:
+		ESP_LOGE(TAG, "@@@@@ case clusterId == OnOff::Id");
         OnOnOffPostAttributeChangeCallback(endpointId, attributeId, value);
         break;
 
     case LevelControl::Id:
+		ESP_LOGE(TAG, "@@@@@ case clusterId == LevelControll::Id");
         OnLevelControlAttributeChangeCallback(endpointId, attributeId, value);
         break;
 
 #if CONFIG_LED_TYPE_RMT
     case ColorControl::Id:
+		ESP_LOGE(TAG, "@@@@@ case clusterId == Colorcontrol::Id");
         OnColorControlAttributeChangeCallback(endpointId, attributeId, value);
         break;
 #endif
 
     default:
+		ESP_LOGE(TAG, "@@@@@ Unhandled cluster");
         ESP_LOGI(TAG, "Unhandled cluster ID: %" PRIu32, clusterId);
         break;
     }
+	ESP_LOGE(TAG, "@@@@@ END AppDeviceCallbacks::PostAttributeChangeCallback"); 
 
     ESP_LOGI(TAG, "Current free heap: %u\n", static_cast<unsigned int>(heap_caps_get_free_size(MALLOC_CAP_8BIT)));
 }
 
 void AppDeviceCallbacks::OnOnOffPostAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacks::OnOnOffPostAttributeChangeCallback"); 
     VerifyOrExit(attributeId == OnOff::Attributes::OnOff::Id,
                  ESP_LOGI(TAG, "Unhandled Attribute ID: '0x%" PRIx32 "'", attributeId));
     VerifyOrExit(endpointId == 1, ESP_LOGE(TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
     AppLED.Set(*value);
+	ESP_LOGE(TAG, "@@@@@ END AppDeviceCallbacks::OnOnOffPostAttributeChangeCallback"); 
 
 exit:
+	ESP_LOGE(TAG, "@@@@@ EXIT AppDeviceCallbacks::OnOnOffPostAttributeChangeCallback"); 
     return;
 }
 
 void AppDeviceCallbacks::OnLevelControlAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacks::OnLevelControlAttributeChangeCallback"); 
     VerifyOrExit(attributeId == LevelControl::Attributes::CurrentLevel::Id,
                  ESP_LOGI(TAG, "Unhandled Attribute ID: '0x%" PRIx32 "'", attributeId));
     VerifyOrExit(endpointId == 1, ESP_LOGE(TAG, "Unexpected EndPoint ID: `0x%02x'", endpointId));
 
     AppLED.SetBrightness(*value);
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacks::OnLevelControlAttributeChangeCallback"); 
 
 exit:
+	ESP_LOGE(TAG, "@@@@@ EXIT AppDeviceCallbacks::OnLevelControlAttributeChangeCallback"); 
     return;
 }
 
@@ -96,6 +109,7 @@ exit:
 #if CONFIG_LED_TYPE_RMT
 void AppDeviceCallbacks::OnColorControlAttributeChangeCallback(EndpointId endpointId, AttributeId attributeId, uint8_t * value)
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacks::OnColorControlAttributeChangeCallback"); 
     using namespace ColorControl::Attributes;
 
     uint8_t hue, saturation;
@@ -115,8 +129,10 @@ void AppDeviceCallbacks::OnColorControlAttributeChangeCallback(EndpointId endpoi
         CurrentHue::Get(endpointId, &hue);
     }
     AppLED.SetColor(hue, saturation);
+	ESP_LOGE(TAG, "@@@@@ END AppDeviceCallbacks::OnColorControlAttributeChangeCallback"); 
 
 exit:
+	ESP_LOGE(TAG, "@@@@@ EXIT AppDeviceCallbacks::OnColorControlAttributeChangeCallback"); 
     return;
 }
 #endif // CONFIG_LED_TYPE_RMT
@@ -137,16 +153,22 @@ exit:
  */
 void emberAfOnOffClusterInitCallback(EndpointId endpoint)
 {
+	ESP_LOGE(TAG, "@@@@@ START emberAfOnOffClusterInitCallback"); 
     ESP_LOGI(TAG, "emberAfOnOffClusterInitCallback");
     GetAppTask().UpdateClusterState();
+	ESP_LOGE(TAG, "@@@@@ END emberAfOnOffClusterInitCallback"); 
 }
 
 void AppDeviceCallbacksDelegate::OnIPv4ConnectivityEstablished()
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacksDelegate::OnIPv4ConnectivityEstablished"); 
     wifiLED.Set(true);
+	ESP_LOGE(TAG, "@@@@@ END AppDeviceCallbacksDelegate::OnIPv4ConnectivityEstablished"); 
 }
 
 void AppDeviceCallbacksDelegate::OnIPv4ConnectivityLost()
 {
+	ESP_LOGE(TAG, "@@@@@ START AppDeviceCallbacksDelegate::OnIPv4ConnectivityLost"); 
     wifiLED.Set(false);
+	ESP_LOGE(TAG, "@@@@@ END AppDeviceCallbacksDelegate::OnIPv4ConnectivityLost"); 
 }
