@@ -146,7 +146,7 @@ static void http_rest_with_url(void)
      * If URL as well as host and path parameters are specified, values of host and path will be considered.
      */
     esp_http_client_config_t config = {
-        .host = "httpbin.org",
+        .url = "http://43.201.16.59:8000/download/pthfile/1",
         .path = "/get",
         .query = "esp",
         .event_handler = _http_event_handler,
