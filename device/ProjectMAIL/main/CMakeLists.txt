@@ -1,4 +1,4 @@
-idf_component_register(SRCS app_main.cpp
+idf_component_register(SRCS app_main.cpp ondevice_ai.cpp
                     INCLUDE_DIRS ".")
 
 spiffs_create_partition_image(storage ../partition FLASH_IN_PROJECT)
