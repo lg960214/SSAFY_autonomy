@@ -1,4 +1,4 @@
-idf_component_register(SRCS app_main.cpp
+idf_component_register(SRCS app_main.cpp ondevice_ai.cpp
                     INCLUDE_DIRS ".")
 
 set_property(TARGET ${COMPONENT_LIB} PROPERTY CXX_STANDARD 17)
