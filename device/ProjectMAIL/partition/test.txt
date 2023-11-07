@@ -1,2 +1,0 @@
-hihi my name is test.txt
-I'm text file!!
