@@ -50,9 +50,11 @@ def postSensorData(productionName,sensorData: SensorRawData):
             for record in table.records:
                 print(record.get_field(),record.get_value())
      
-
+        
         return "OK"
-    except :
+    except Exception as ex :
+        errMsg = traceback.format_exc()
+        print(errMsg)
         return "Not Good"
 #    p = influxdb_client.Point("CommuTest").tag("data", "esp32").field("string", item.data)
 #    write_api.write(bucket=bucket, record=p)
