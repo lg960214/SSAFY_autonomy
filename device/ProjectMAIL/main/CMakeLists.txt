@@ -1,5 +1,10 @@
-idf_component_register(SRCS app_main.cpp ondevice_ai.cpp
-                    INCLUDE_DIRS ".")
+set(requires "")
+if(${IDF_TARGET} STREQUAL "linux")
+    list(APPEND requires esp_stubs esp-tls esp_http_client protocol_examples_common nvs_flash)
+endif()
+idf_component_register(SRCS app_main.cpp http_client.cpp
+                    INCLUDE_DIRS "."
+                    REQUIRES ${requires})
 
 spiffs_create_partition_image(storage ../partition FLASH_IN_PROJECT)
 
