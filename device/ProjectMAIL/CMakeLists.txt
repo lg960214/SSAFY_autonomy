@@ -28,7 +28,14 @@ set(EXTRA_COMPONENT_DIRS
     "${MATTER_SDK_PATH}/config/esp32/components"
     "${ESP_MATTER_PATH}/components"
     "${ESP_MATTER_PATH}/device_hal/device"
+    "$ENV{IDF_PATH}/examples/common_components/protocol_examples_common"
     ${extra_components_dirs_append})
+
+if(${IDF_TARGET} STREQUAL "linux")
+    list(APPEND EXTRA_COMPONENT_DIRS "$ENV{IDF_PATH}/tools/mocks/freertos/"
+                    "$ENV{IDF_PATH}/examples/protocols/linux_stubs/esp_stubs")
+    set(COMPONENTS main)
+endif()
 
 project(ProjectMAIL)
 

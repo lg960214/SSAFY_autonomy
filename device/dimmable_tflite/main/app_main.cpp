@@ -12,7 +12,7 @@
 
 #include <esp_matter.h>
 #include <esp_matter_console.h>
-#include <esp_matter_ota.h>
+//#include <esp_matter_ota.h>
 
 #include <app_priv.h>
 #include <app_reset.h>
@@ -37,6 +37,9 @@ uint inference_count = 0;
 constexpr uint kTensorArenaSize = 2000;
 uint8_t tensor_arena[kTensorArenaSize];
 }  // namespace
+
+const float kXrange = 2.f * 3.14159265359f;
+const int kInferencesPerCycle = 20;
 
 static const char *TAG = "app_main";
 uint16_t endpoint1_id = 0;
@@ -179,29 +182,22 @@ extern "C" void app_main()
     /* esp-tflite-micro test */
     model = tflite::GetModel(g_model);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
-        ESP_LOGI(TAG, "@@@@@@@@ Model Load failed");
-    } else {
-        ESP_LOGI(TAG, "@@@@@@@@ Model Load success");
-	}
+        ESP_LOGI(TAG, "Model Load failed");
+    }
     
     static tflite::MicroMutableOpResolver<1> resolver;
     if (resolver.AddFullyConnected() != kTfLiteOk) {
-        ESP_LOGI(TAG, "@@@@@@@@ Resolver Error");
-    } else {
-        ESP_LOGI(TAG, "@@@@@@@@ Resolver success");
-	}
+        ESP_LOGI(TAG, "Resolver Error");
+    }
 
     static tflite::MicroInterpreter static_interpreter(
         model, resolver, tensor_arena, kTensorArenaSize);
     interpreter = &static_interpreter;
-	ESP_LOGI(TAG, "@@@@@@@@@ Interpreter Created");
     
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
     if (allocate_status != kTfLiteOk) {
         ESP_LOGI(TAG, "AllocateTensors() failed");
-    } else {
-        ESP_LOGI(TAG, "AllocateTensors() Success");
-	}
+    }
 
     /* Matter start */
     err = esp_matter::start(app_event_cb);
@@ -211,4 +207,34 @@ extern "C" void app_main()
 
     /* Starting driver with default values */
     app_driver_light_set_defaults(endpoint1_id);
+
+    input = interpreter->input(0);
+    output = interpreter->output(0);
+
+    inference_count = 0;
+
+    while(true) {
+        float position = static_cast<float>(inference_count) /
+                         static_cast<float>(kInferencesPerCycle);
+        float x = position * kXrange;
+
+        int8_t x_quantized = x / input->params.scale + input->params.zero_point;
+        input->data.int8[0] = x_quantized;
+
+        TfLiteStatus invoke_status = interpreter->Invoke();
+
+        if (invoke_status != kTfLiteOk) {
+            MicroPrintf("Invoke failed on x: %f\n",
+                        static_cast<double>(x));
+            return;
+        }
+
+        int8_t y_quantized = output->data.int8[0];
+
+        float y = (y_quantized - output->params.zero_point) * output->params.scale;
+
+        ESP_LOGI(TAG, "(X: %f, Y: %f)", static_cast<double>(x), static_cast<double>(y));
+        inference_count += 1;
+        if(inference_count >= kInferencesPerCycle) inference_count = 0;
+    }
 }
