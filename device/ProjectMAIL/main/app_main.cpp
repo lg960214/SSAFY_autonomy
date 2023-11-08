@@ -7,16 +7,14 @@
 #include "sensor.h"
 
 // FAST server REST API
-#include "http_client.h"
-
 static const char* TAG = "app_main";
 static esp_adc_cal_characteristics_t adc1_chars;
 
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Hello");
-    // test_file_system();
-
+    my_printf();
+    
     // 조도센서 측정값
     int g_illuminance = 1023;
     // 수동 여부
