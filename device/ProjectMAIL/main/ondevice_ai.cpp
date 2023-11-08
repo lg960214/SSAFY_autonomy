@@ -1,3 +1,5 @@
+/* EXAMPLE */
+
 #include "ondevice_ai.h"
 
 #include "dirent.h"
@@ -12,8 +14,7 @@ const char* TAG = "ondevice_ai";
 namespace {
 const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* input0 = nullptr;
-TfLiteTensor* input1 = nullptr;
+TfLiteTensor* input = nullptr;
 TfLiteTensor* output = nullptr;
 int inference_count = 0;
 
@@ -25,111 +26,73 @@ const float kXrange = 2.f * 3.14159265359f;
 const int kInferencesPerCycle = 20;
 
 void setModel() {
-    // SPIFFS Configuration
-    esp_vfs_spiffs_conf_t conf = {
-      .base_path = "/spiffs",
-      .partition_label = NULL,
-      .max_files = 5,
-      .format_if_mount_failed = true
-    };
-
-    // Initialize SPIFFS
-    ESP_LOGI(TAG, "Load SPIFFS");
-    esp_err_t ret = esp_vfs_spiffs_register(&conf);
-    if (ret != ESP_OK) {
-        ESP_LOGE("SPIFFS", "Failed to initialize SPIFFS");
-        return;
-    }
-    
-    ESP_LOGI(TAG, "Open directory");
-    DIR *dir = opendir("/spiffs/");
-
-    ESP_LOGI("SPIFFS", "List of files:");
-    struct dirent *ent;
-    while ((ent = readdir(dir)) != NULL) {
-        ESP_LOGI("SPIFFS", "  %s", ent->d_name);
-    }
-    closedir(dir);
-
-    // Read the .tflite model from SPIFFS
-    FILE* file = fopen("/spiffs/model.tflite", "rb");
-    if (file == NULL) {
-        ESP_LOGE("SPIFFS", "Failed to open model file");
+    // Map the model into a usable data structure. This doesn't involve any
+    // copying or parsing, it's a very lightweight operation.
+    model = tflite::GetModel(g_model);
+    if (model->version() != TFLITE_SCHEMA_VERSION) {
+        ESP_LOGI(TAG, "Schema version %d", TFLITE_SCHEMA_VERSION);
         return;
     }
 
-    ESP_LOGI(TAG, "Fseek");
-    fseek(file, 0, SEEK_END);
-    size_t modelSize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    ESP_LOGI(TAG, "ModelBuffer");
-    uint8_t* modelBuffer = (uint8_t*) malloc(modelSize);
-    fread(modelBuffer, 1, modelSize, file);
-    fclose(file);
-
-    ESP_LOGI(TAG, "Load model");
-    model = tflite::GetModel(modelBuffer);
-
-    ESP_LOGI(TAG, "Unregist SPIFFS");
-    esp_vfs_spiffs_unregister(NULL); // Unregister SPIFFS
-
-    // ESP_LOGI(TAG, "Load model");
-    // model = tflite::GetModel("model.cc");
-
-    ESP_LOGI(TAG, "Make resolver");
+    // Pull in only the operation implementations we need.
     static tflite::MicroMutableOpResolver<1> resolver;
-    resolver.AddFullyConnected();
+    if (resolver.AddFullyConnected() != kTfLiteOk) {
+        return;
+    }
 
-    ESP_LOGI(TAG, "Make interpreter");
+    // Build an interpreter to run the model with.
     static tflite::MicroInterpreter static_interpreter(
-            model, resolver, tensor_arena, kTensorArenaSize);
+        model, resolver, tensor_arena, kTensorArenaSize);
     interpreter = &static_interpreter;
 
-    // interpreter->ResizeInput(0, {BATCH_SIZE, 7});
-    // interpreter->ResizeInput(1, {BATCH_SIZE, INPUT_SEQ_LEN, INPUT_DIM});
-
-    ESP_LOGI(TAG, "Allocate tensors");
+    // Allocate memory from the tensor_arena for the model's tensors.
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
+    if (allocate_status != kTfLiteOk) {
+        ESP_LOGI(TAG, "AllocateTensors() failed");
+        return;
+    } else {
+        ESP_LOGI(TAG, "AllocateTensors() Success");
+    }
 
-    ESP_LOGI(TAG, "Set input");
-    input0 = interpreter->input(0);
-    input1 = interpreter->input(1);
-
-    ESP_LOGI(TAG, "Set output");
+    // Obtain pointers to the model's input and output tensors.
+    input = interpreter->input(0);
     output = interpreter->output(0);
 
-    ESP_LOGI(TAG, "Set inference_count");
+    // Keep track of how many inferences we have performed.
     inference_count = 0;
 }
 
 void inference() {
-    ESP_LOGI(TAG, "Inference");
+    float position = static_cast<float>(inference_count) /
+                    static_cast<float>(kInferencesPerCycle);
+    float x = position * kXrange;
 
-    float sample_0[7] = {2023, 11, 8, 3, 10, 1, 20}; // 년 월 일 요일 시 분 초
-    float sample_1[10] = {69, 69, 69, 69, 69, 69, 69, 69, 69, 69}; // 센서 데이터
+    // Quantize the input from floating-point to integer
+    int8_t x_quantized = x / input->params.scale + input->params.zero_point;
+    // Place the quantized input in the model's input tensor
+    input->data.int8[0] = x_quantized;
 
-    float* input_data_0 = interpreter->typed_input_tensor<float>(0);
-    float* input_data_1 = interpreter->typed_input_tensor<float>(1);
-
-    for (int i = 0; i < 7; i++) {
-        input_data_0[i] = sample_0[i];
+    // Run inference, and report any error
+    TfLiteStatus invoke_status = interpreter->Invoke();
+    if (invoke_status != kTfLiteOk) {
+        MicroPrintf("Invoke failed on x: %f\n",
+                    static_cast<double>(x));
+        return;
     }
 
-    for (int i = 0; i < 10; i++) {
-        input_data_1[i] = sample_1[i];
-    }
+    // Obtain the quantized output from model's output tensor
+    int8_t y_quantized = output->data.int8[0];
+    // Dequantize the output from integer to floating-point
+    float y = (y_quantized - output->params.zero_point) * output->params.scale;
 
-    // Invoke inference
-    interpreter->Invoke();
+    // Output the results. A custom HandleOutput function can be implemented
+    // for each supported hardware target.
+    ESP_LOGI(TAG, "x_value: %f, y_value: %f", x, y);
 
-    // Get the output tensor
-    float* output_data = interpreter->typed_output_tensor<float>(0);
-
-    // Print the output data
-    for (int i = 0; i < OUTPUT_DIM; i++) {
-        ESP_LOGI(TAG, "Output[%d] = %f", i, output_data[i]);
-    }
+    // Increment the inference_counter, and reset it if we have reached
+    // the total number per cycle
+    inference_count += 1;
+    if (inference_count >= kInferencesPerCycle) inference_count = 0;
 
     return;
 }
