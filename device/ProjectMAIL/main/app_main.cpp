@@ -1,18 +1,16 @@
 #include <esp_log.h>
 //#include <esp_err.h>
 
-#include "ondevice_ai.h"
+// #include "ondevice_ai.h"
 
 // FAST server REST API
-#include "http_client.h"
-
 static const char* TAG = "app_main";
 
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Hello");
-    // test_file_system();
-
+    my_printf();
+    
     // 조도센서 측정값
     int g_illuminance = 1023;
     // 수동 여부
