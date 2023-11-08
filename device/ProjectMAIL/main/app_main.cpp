@@ -14,7 +14,8 @@ extern "C" void app_main(void)
     ESP_LOGI(TAG, "Hello");
 
     matter_start();
-
+    light_control_init();
+    
     setModel();
 
     inference();

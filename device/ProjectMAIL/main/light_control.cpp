@@ -7,6 +7,10 @@ static const char *TAG = "light_control";
 extern uint16_t light_endpoint_id;
 extern app_driver_handle_t light_handle;
 /* Do any conversions/remapping for the actual value here */
+void light_control_init(){
+    ESP_ERROR_CHECK(adc1_config_width(ADC_WIDTH_BIT_10));
+    ESP_ERROR_CHECK(adc1_config_channel_atten(ADC1_CHANNEL_6, ADC_ATTEN_DB_11)); // channel6 is gpio 34
+}
 
 esp_err_t light_set_power(bool power)
 {
