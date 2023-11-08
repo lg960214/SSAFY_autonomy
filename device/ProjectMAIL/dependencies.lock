@@ -87,14 +87,14 @@ dependencies:
   espressif__esp-tflite-micro:
     component_hash: null
     source:
-      path: /home/ssafy/S09P31A305/device/ProjectMAIL/components/espressif__esp-tflite-micro
+      path: /home/euiseon/S09P31A305/device/ProjectMAIL/components/espressif__esp-tflite-micro
       type: local
     version: 1.2.0
   idf:
     component_hash: null
     source:
       type: idf
-    version: 5.1.1
+    version: 5.1.0
 manifest_hash: e7a30725bdec1c0fc2850ddc6ef6487b7070585c81b28dc386040d0d4aae3122
 target: esp32
 version: 1.0.0
