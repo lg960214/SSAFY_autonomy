@@ -2,16 +2,22 @@
 
 #include "dirent.h"
 
+#define INPUT_DIM 1
+#define OUTPUT_DIM 1
+#define BATCH_SIZE 1
+#define INPUT_SEQ_LEN 10
+
 const char* TAG = "ondevice_ai";
 
 namespace {
 const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
-TfLiteTensor* input = nullptr;
+TfLiteTensor* input0 = nullptr;
+TfLiteTensor* input1 = nullptr;
 TfLiteTensor* output = nullptr;
 int inference_count = 0;
 
-constexpr int kTensorArenaSize = 2000;
+constexpr int kTensorArenaSize = 3000;
 uint8_t tensor_arena[kTensorArenaSize];
 }
 
@@ -43,12 +49,10 @@ void setModel() {
     while ((ent = readdir(dir)) != NULL) {
         ESP_LOGI("SPIFFS", "  %s", ent->d_name);
     }
-
-    // Cleanup
     closedir(dir);
 
     // Read the .tflite model from SPIFFS
-    FILE* file = fopen("/spiffs/hello_world_int8.tflite", "rb");
+    FILE* file = fopen("/spiffs/model.tflite", "rb");
     if (file == NULL) {
         ESP_LOGE("SPIFFS", "Failed to open model file");
         return;
@@ -67,8 +71,11 @@ void setModel() {
     ESP_LOGI(TAG, "Load model");
     model = tflite::GetModel(modelBuffer);
 
-    ESP_LOGI(TAG, "Unregist model");
+    ESP_LOGI(TAG, "Unregist SPIFFS");
     esp_vfs_spiffs_unregister(NULL); // Unregister SPIFFS
+
+    // ESP_LOGI(TAG, "Load model");
+    // model = tflite::GetModel("model.cc");
 
     ESP_LOGI(TAG, "Make resolver");
     static tflite::MicroMutableOpResolver<1> resolver;
@@ -79,11 +86,15 @@ void setModel() {
             model, resolver, tensor_arena, kTensorArenaSize);
     interpreter = &static_interpreter;
 
+    // interpreter->ResizeInput(0, {BATCH_SIZE, 7});
+    // interpreter->ResizeInput(1, {BATCH_SIZE, INPUT_SEQ_LEN, INPUT_DIM});
+
     ESP_LOGI(TAG, "Allocate tensors");
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
 
     ESP_LOGI(TAG, "Set input");
-    input = interpreter->input(0);
+    input0 = interpreter->input(0);
+    input1 = interpreter->input(1);
 
     ESP_LOGI(TAG, "Set output");
     output = interpreter->output(0);
@@ -95,36 +106,30 @@ void setModel() {
 void inference() {
     ESP_LOGI(TAG, "Inference");
 
-    float position = static_cast<float>(inference_count) /
-                    static_cast<float>(kInferencesPerCycle);
-    float x = position * kXrange;
+    float sample_0[7] = {2023, 11, 8, 3, 10, 1, 20}; // 년 월 일 요일 시 분 초
+    float sample_1[10] = {69, 69, 69, 69, 69, 69, 69, 69, 69, 69}; // 센서 데이터
 
-    // Quantize the input from floating-point to integer
-    int8_t x_quantized = x / input->params.scale + input->params.zero_point;
-    // Place the quantized input in the model's input tensor
-    input->data.int8[0] = x_quantized;
+    float* input_data_0 = interpreter->typed_input_tensor<float>(0);
+    float* input_data_1 = interpreter->typed_input_tensor<float>(1);
 
-    // Run inference, and report any error
-    TfLiteStatus invoke_status = interpreter->Invoke();
-    if (invoke_status != kTfLiteOk) {
-        MicroPrintf("Invoke failed on x: %f\n",
-                                static_cast<double>(x));
-        return;
+    for (int i = 0; i < 7; i++) {
+        input_data_0[i] = sample_0[i];
     }
 
-    // Obtain the quantized output from model's output tensor
-    int8_t y_quantized = output->data.int8[0];
-    // Dequantize the output from integer to floating-point
-    float y = (y_quantized - output->params.zero_point) * output->params.scale;
+    for (int i = 0; i < 10; i++) {
+        input_data_1[i] = sample_1[i];
+    }
 
-    // Output the results. A custom HandleOutput function can be implemented
-    // for each supported hardware target.
-    ESP_LOGI(TAG, "%f %f", static_cast<double>(x), static_cast<double>(y));
+    // Invoke inference
+    interpreter->Invoke();
 
-    // Increment the inference_counter, and reset it if we have reached
-    // the total number per cycle
-    inference_count += 1;
-    if (inference_count >= kInferencesPerCycle) inference_count = 0;
+    // Get the output tensor
+    float* output_data = interpreter->typed_output_tensor<float>(0);
+
+    // Print the output data
+    for (int i = 0; i < OUTPUT_DIM; i++) {
+        ESP_LOGI(TAG, "Output[%d] = %f", i, output_data[i]);
+    }
 
     return;
 }
