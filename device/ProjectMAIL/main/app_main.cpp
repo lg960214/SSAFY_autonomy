@@ -8,6 +8,11 @@
 #include "matter_start.h"
 #include "ondevice_ai.h"
 
+// FAST server REST API
+extern "C" {
+    #include "http_client.h"
+}
+
 static const char* TAG = "app_main";
 
 bool g_AI_mode = false;
