@@ -4,17 +4,12 @@
 #include "nvs_flash.h"
 #include "esp_netif.h"
 #include "esp_event.h"
-#include "esp_http_client.h"
 #include "esp_tls.h"
 #include "protocol_examples_common.h"
+#include "http_client.h"
 
 static const char* TAG = "HTTP_CLIENT";
-#define MAX_HTTP_OUTPUT_BUFFER 100
-
-void my_printf()
-{
-    printf("hih\n");
-}
+#define MAX_HTTP_OUTPUT_BUFFER 10
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -91,19 +86,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
 void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
 {
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    ESP_ERROR_CHECK(example_connect());
-    ESP_LOGI(TAG, "Connected to AP, begin http example");
-
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
         .url = "http://43.201.16.59:8001/upload/sensor/1",
@@ -116,18 +98,17 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
 
     ESP_LOGI(TAG, "Start Time");
     time_t timer = time(NULL);
-    struct tm* t = localtime(&timer);
-    int year = t->tm_year + 1900;
-    int mon = t->tm_mon + 1;
-    int day = t->tm_mday;
-    int hour = t->tm_hour;
-    int min_m = t->tm_min;
-    int sec = t->tm_sec;
-    int wday = t->tm_wday;
+    struct tm t;
+    localtime_r(&timer, &t);
+    int mon = t.tm_mon + 1;
+    int day = t.tm_mday;
+    int hour = t.tm_hour;
+    int min_m = t.tm_min;
+    int sec = t.tm_sec;
+    int wday = t.tm_wday;
 
     char post_data[250] =  { 0, };
-    sprintf(post_data, "{\"YYYY\" : \"%d\", \"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", year, mon, day, hour, min_m, sec, wday, illuminance, is_auto, brightness, is_on);
-    printf(post_data);
+    sprintf(post_data, "{\"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", mon, day, hour, min_m, sec, wday, illuminance, is_auto, brightness, is_on);
     esp_http_client_set_url(client, "http://43.201.16.59:8001/upload/sensor/M16M");
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_header(client, "Content-Type", "application/json");

@@ -1,4 +1,4 @@
-idf_component_register(SRCS "app_main.cpp" "ondevice_ai.cpp" "matter_start.cpp" "app_driver.cpp" "sensor.cpp" "light_control.cpp" "http_client.c"
+idf_component_register(SRCS "app_main.cpp" "ondevice_ai.cpp" "matter_start.cpp" "app_driver.cpp" "sensor.cpp" "light_control.cpp" "http_client.c" "get_set_time.c"
                     INCLUDE_DIRS "." "includes"
                     REQUIRES ${requires})
 
