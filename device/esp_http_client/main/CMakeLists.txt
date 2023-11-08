@@ -7,7 +7,5 @@ if(${IDF_TARGET} STREQUAL "linux")
 endif()
 idf_component_register(SRCS "esp_http_client_example.c"
                     INCLUDE_DIRS "."
-                    REQUIRES ${requires}
-                    EMBED_TXTFILES howsmyssl_com_root_cert.pem
-                    postman_root_cert.pem)
+                    REQUIRES ${requires})
 spiffs_create_partition_image(storage ../partition FLASH_IN_PROJECT)
