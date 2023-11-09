@@ -1,11 +1,6 @@
-
-
 #include "matter_start.h"
 
-#if CHIP_DEVICE_CONFIG_ENABLE_THREAD
-#include <platform/ESP32/OpenthreadLauncher.h>
-#endif
-static const char *TAG = "app_main";
+static const char *TAG = "matter_start";
 uint16_t light_endpoint_id = 0;
 
 using namespace esp_matter;
@@ -138,15 +133,6 @@ extern "C" void matter_start()
     light_endpoint_id = endpoint::get_id(endpoint);
     ESP_LOGI(TAG, "Light created with endpoint_id %d", light_endpoint_id);
 
-#if CHIP_DEVICE_CONFIG_ENABLE_THREAD
-    /* Set OpenThread platform config */
-    esp_openthread_platform_config_t config = {
-        .radio_config = ESP_OPENTHREAD_DEFAULT_RADIO_CONFIG(),
-        .host_config = ESP_OPENTHREAD_DEFAULT_HOST_CONFIG(),
-        .port_config = ESP_OPENTHREAD_DEFAULT_PORT_CONFIG(),
-    };
-    set_openthread_platform_config(&config);
-#endif
     /* Matter start */
     err = esp_matter::start(app_event_cb);
     if (err != ESP_OK) {
@@ -155,6 +141,7 @@ extern "C" void matter_start()
 
     /* Starting driver with default values */
     app_driver_light_set_defaults(light_endpoint_id);
+
 #if CONFIG_ENABLE_CHIP_SHELL
     esp_matter::console::diagnostics_register_commands();
     esp_matter::console::wifi_register_commands();
