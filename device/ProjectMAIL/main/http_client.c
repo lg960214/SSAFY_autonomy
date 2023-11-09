@@ -4,8 +4,10 @@
 #include "esp_tls.h"
 #include "http_client.h"
 
+#include "esp_spiffs.h"
+
 static const char* TAG = "HTTP_CLIENT";
-#define MAX_HTTP_OUTPUT_BUFFER 10
+#define MAX_HTTP_OUTPUT_BUFFER 70
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -109,5 +111,117 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
     } else {
         ESP_LOGI(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
     }
+    esp_http_client_cleanup(client);
+}
+
+void get_ftlite_file(void)
+{
+    char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+    esp_http_client_config_t config = {
+        .host = "http://43.201.16.59:8001/download/tflitefile/M16M/",
+        .path = "/get",
+        .query = "esp",
+        .event_handler = _http_event_handler,
+        .user_data = local_response_buffer,        // Pass address of local buffer to get response
+        .disable_auto_redirect = true,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+
+    // GET
+    int status_code = 0;
+    int order_code = -1;
+    int host_url_len = strlen(config.host);
+    char current_url[100] = { 0, };
+    char order_str[30] = { 0, };
+
+    strcpy(current_url, config.host);
+
+    // file systema init
+    ESP_LOGI(TAG, "Initializing SPIFFS");
+    esp_vfs_spiffs_conf_t conf = {
+      .base_path = "/spiffs",
+      .partition_label = NULL,
+      .max_files = 1,
+      .format_if_mount_failed = true
+    };
+
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
+    if (ret != ESP_OK) {
+        if (ret == ESP_FAIL) {
+            ESP_LOGE(TAG, "Failed to mount or format filesystem");
+        } else if (ret == ESP_ERR_NOT_FOUND) {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+        } else {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+        }
+        return;
+    }
+
+    size_t total = 0, used = 0;
+    ret = esp_spiffs_info(conf.partition_label, &total, &used);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s). Formatting...", esp_err_to_name(ret));
+        esp_spiffs_format(conf.partition_label);
+        return;
+    } else {
+        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+    }
+
+    // reset file
+    ESP_LOGI(TAG, "Opening file");
+    FILE* f = fopen("/spiffs/model.ftlite", "w");
+    if (f == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        return;
+    }
+    fclose(f);
+
+    // data request start
+    esp_err_t err = ESP_OK;
+    while (err == ESP_OK && status_code == 0)
+    {
+        while (status_code == 0)
+        {
+            // file read continue.
+            // set url
+            order_code += 1;
+            memset(order_str, 0, sizeof(order_str));
+            itoa(order_code, order_str, 10);
+            strcpy(&current_url[host_url_len], order_str);
+            esp_http_client_set_url(client, current_url);
+
+            // get request
+            err = esp_http_client_perform(client);
+            if (err != ESP_OK)
+            {
+                ESP_LOGI(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+                break;
+            }
+
+            ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRIu64,
+                    esp_http_client_get_status_code(client),
+                    esp_http_client_get_content_length(client));
+            
+            // file write
+            f = fopen("/spiffs/model.ftlite", "a");
+            if (f == NULL) {
+                ESP_LOGE(TAG, "Failed to open file for writing");
+                // 파일 손상
+                return;
+            }
+            local_response_buffer[esp_http_client_get_content_length(client) - 1] = '\0';
+            fprintf(f, &local_response_buffer[2]);
+            fclose(f);
+            status_code = local_response_buffer[1] - '0';
+        }
+        if (err != ESP_OK)
+        {
+            ESP_LOGI(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+            break;
+        }
+    }
+
+    file_read();
+    esp_vfs_spiffs_unregister(NULL);
     esp_http_client_cleanup(client);
 }

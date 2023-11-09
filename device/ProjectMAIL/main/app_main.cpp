@@ -39,6 +39,7 @@ extern "C" void app_main(void)
     }
 
     // TODO: Call data POST
+    get_ftlite_file();
     
     if(g_model_update) {
         // @ enduser0
