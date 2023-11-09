@@ -1,6 +1,5 @@
 {
     "files.associations": {
-        "random": "cpp",
         "array": "cpp",
         "tuple": "cpp",
         "utility": "cpp"

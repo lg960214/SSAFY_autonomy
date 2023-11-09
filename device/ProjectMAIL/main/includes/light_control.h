@@ -16,3 +16,7 @@ bool light_get_power();
 int8_t light_get_brightness();
 void light_control_init();
 
+typedef struct SensorData{
+    int motion_state;
+    uint32_t illumi_value;
+};
