@@ -17,3 +17,8 @@ uint32_t get_illumi_value(){
     int illumi_value = adc1_get_raw(ADC1_CHANNEL_6); 
     return illumi_value;
 }
+
+void get_sensor_data(Sensor *s){
+    s->motion_state = get_motion_detect_state();
+    s->illumi_value = get_illumi_value();
+}
