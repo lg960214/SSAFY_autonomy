@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
@@ -47,13 +46,14 @@ void set_time(void)
 
     // GET
     esp_err_t err = esp_http_client_perform(client);
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRIu64,
-                esp_http_client_get_status_code(client),
-                esp_http_client_get_content_length(client));
-    } else {
+    while (err != ESP_OK) {
+        err = esp_http_client_perform(client);
         ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
     }
+    ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %"PRIu64,
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+    
     esp_http_client_cleanup(client);
     server_sec = atoi(local_response_buffer);
 
@@ -66,21 +66,4 @@ void set_time(void)
     int error = settimeofday(&initial_timeval, NULL);
     assert(error == 0);
     return ;
-}
-
-void get_time(void)
-{
-    // Get current time as 'struct timeval'.
-    // See https://linux.die.net/man/2/gettimeofday
-    struct timeval new_timeval;
-    int err = gettimeofday(&new_timeval, NULL);
-    assert(err == 0);
-    // Extract Unix time
-    time_t new_unix_time = new_timeval.tv_sec;
-    // Convert to broken-down time
-    // See https://en.cppreference.com/w/c/chrono/localtime
-    struct tm new_time;
-    localtime_r(&new_unix_time, &new_time);
-    // 'new_time' now contains the current time components
-    printf("Current time: %s", asctime(&new_time));
 }

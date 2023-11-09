@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <sys/param.h>
 #include "esp_log.h"
-#include "nvs_flash.h"
-#include "esp_netif.h"
-#include "esp_event.h"
 #include "esp_tls.h"
-#include "protocol_examples_common.h"
 #include "http_client.h"
 
 static const char* TAG = "HTTP_CLIENT";
@@ -96,19 +92,12 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
-    ESP_LOGI(TAG, "Start Time");
     time_t timer = time(NULL);
     struct tm t;
     localtime_r(&timer, &t);
-    int mon = t.tm_mon + 1;
-    int day = t.tm_mday;
-    int hour = t.tm_hour;
-    int min_m = t.tm_min;
-    int sec = t.tm_sec;
-    int wday = t.tm_wday;
 
     char post_data[250] =  { 0, };
-    sprintf(post_data, "{\"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", mon, day, hour, min_m, sec, wday, illuminance, is_auto, brightness, is_on);
+    sprintf(post_data, "{\"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, illuminance, is_auto, brightness, is_on);
     esp_http_client_set_url(client, "http://43.201.16.59:8001/upload/sensor/M16M");
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_header(client, "Content-Type", "application/json");
