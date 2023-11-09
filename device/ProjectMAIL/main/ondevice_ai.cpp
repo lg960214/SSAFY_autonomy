@@ -13,7 +13,7 @@ namespace {
 const tflite::Model* model = nullptr;
 tflite::MicroInterpreter* interpreter = nullptr;
 TfLiteTensor* input0 = nullptr;
-TfLiteTensor* input1 = nullptr;
+// TfLiteTensor* input1 = nullptr;
 TfLiteTensor* output = nullptr;
 int inference_count = 0;
 
@@ -37,22 +37,23 @@ void setModel() {
     ESP_LOGI(TAG, "Load SPIFFS");
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
     if (ret != ESP_OK) {
-        ESP_LOGE("SPIFFS", "Failed to initialize SPIFFS");
+        ESP_LOGE(TAG, "Failed to initialize SPIFFS");
         return;
     }
     
-    ESP_LOGI(TAG, "Open directory");
-    DIR *dir = opendir("/spiffs/");
-
-    ESP_LOGI("SPIFFS", "List of files:");
-    struct dirent *ent;
-    while ((ent = readdir(dir)) != NULL) {
-        ESP_LOGI("SPIFFS", "  %s", ent->d_name);
-    }
-    closedir(dir);
+    // // DEBUG check file lists
+    // ESP_LOGI(TAG, "Open directory");
+    // DIR *dir = opendir("/spiffs/");
+    
+    // ESP_LOGI("SPIFFS", "List of files:");
+    // struct dirent *ent;
+    // while ((ent = readdir(dir)) != NULL) {
+    //     ESP_LOGI("SPIFFS", "  %s", ent->d_name);
+    // }
+    // closedir(dir);
 
     // Read the .tflite model from SPIFFS
-    FILE* file = fopen("/spiffs/model.tflite", "rb");
+    FILE* file = fopen("/spiffs/model_low2.tflite", "rb");
     if (file == NULL) {
         ESP_LOGE("SPIFFS", "Failed to open model file");
         return;
@@ -74,6 +75,7 @@ void setModel() {
     ESP_LOGI(TAG, "Unregist SPIFFS");
     esp_vfs_spiffs_unregister(NULL); // Unregister SPIFFS
 
+    /* Load from cc file */
     // ESP_LOGI(TAG, "Load model");
     // model = tflite::GetModel("model.cc");
 
@@ -86,15 +88,13 @@ void setModel() {
             model, resolver, tensor_arena, kTensorArenaSize);
     interpreter = &static_interpreter;
 
-    // interpreter->ResizeInput(0, {BATCH_SIZE, 7});
-    // interpreter->ResizeInput(1, {BATCH_SIZE, INPUT_SEQ_LEN, INPUT_DIM});
-
     ESP_LOGI(TAG, "Allocate tensors");
     TfLiteStatus allocate_status = interpreter->AllocateTensors();
+    ESP_LOGI(TAG, "Allocate status : %d", allocate_status);
 
     ESP_LOGI(TAG, "Set input");
     input0 = interpreter->input(0);
-    input1 = interpreter->input(1);
+    // input1 = interpreter->input(1);
 
     ESP_LOGI(TAG, "Set output");
     output = interpreter->output(0);
@@ -103,33 +103,47 @@ void setModel() {
     inference_count = 0;
 }
 
-void inference() {
+uint8_t inference() {
     ESP_LOGI(TAG, "Inference");
 
-    float sample_0[7] = {2023, 11, 8, 3, 10, 1, 20}; // 년 월 일 요일 시 분 초
-    float sample_1[10] = {69, 69, 69, 69, 69, 69, 69, 69, 69, 69}; // 센서 데이터
+    input0->data.f[0] = 315.0f;
+    input0->data.f[1] = 10000.0f;
+    input0->data.f[2] = 0.0f;
+    input0->data.f[3] = 892.0f;
 
-    float* input_data_0 = interpreter->typed_input_tensor<float>(0);
-    float* input_data_1 = interpreter->typed_input_tensor<float>(1);
+    // float sample_0[4] = {315, 10000, 0, 892};
+    // float sample_1[10] = {69, 69, 69, 69, 69, 69, 69, 69, 69, 69}; // 센서 데이터
 
-    for (int i = 0; i < 7; i++) {
-        input_data_0[i] = sample_0[i];
-    }
+    // ESP_LOGI(TAG, "interpreter->typed_input_tensor");
+    // float* input_data_0 = interpreter->typed_input_tensor<float>(0);
+    // float* input_data_1 = interpreter->typed_input_tensor<float>(1);
 
-    for (int i = 0; i < 10; i++) {
-        input_data_1[i] = sample_1[i];
-    }
+    // ESP_LOGI(TAG, "insert sample data");
+    // for (int i = 0; i < 4; i++) {
+    //     input_data_0[i] = sample_0[i];
+    // }
+
+    // for (int i = 0; i < 10; i++) {
+    //     input_data_1[i] = sample_1[i];
+    // }
 
     // Invoke inference
+    ESP_LOGI(TAG, "Invoke");
     interpreter->Invoke();
 
+
     // Get the output tensor
-    float* output_data = interpreter->typed_output_tensor<float>(0);
+    // ESP_LOGI(TAG, "interpreter->typed_output_tensor");
+    // float* output_data = interpreter->typed_output_tensor<float>(0);
 
     // Print the output data
+    ESP_LOGI(TAG, "insert output data");
     for (int i = 0; i < OUTPUT_DIM; i++) {
-        ESP_LOGI(TAG, "Output[%d] = %f", i, output_data[i]);
+        ESP_LOGI(TAG, "Output[%d] = %f", i, output->data.f[i]);
     }
 
-    return;
+    uint8_t result = (uint8_t)output->data.f[0];
+    if(result < 10) result = 0;
+
+    return result;
 }

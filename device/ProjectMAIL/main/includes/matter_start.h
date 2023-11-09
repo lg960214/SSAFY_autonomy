@@ -7,9 +7,6 @@
 
 #include <app_priv.h>
 #include <app_reset.h>
-#if CHIP_DEVICE_CONFIG_ENABLE_THREAD
-#include <platform/ESP32/OpenthreadLauncher.h>
-#endif
 #include <app/server/CommissioningWindowManager.h>
 #include <app/server/Server.h>
 
