@@ -15,3 +15,9 @@ typedef struct SensorData{
 
 int get_motion_detect_state();
 uint32_t get_illumi_value();
+void sensor_init();
+
+typedef struct SensorData{
+    int motion_state;
+    uint32_t illumi_value;
+}Sensor;

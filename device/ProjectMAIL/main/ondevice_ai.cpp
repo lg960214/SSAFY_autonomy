@@ -1,3 +1,5 @@
+/* EXAMPLE */
+
 #include "ondevice_ai.h"
 
 #include "dirent.h"
@@ -85,7 +87,7 @@ void setModel() {
 
     ESP_LOGI(TAG, "Make interpreter");
     static tflite::MicroInterpreter static_interpreter(
-            model, resolver, tensor_arena, kTensorArenaSize);
+        model, resolver, tensor_arena, kTensorArenaSize);
     interpreter = &static_interpreter;
 
     ESP_LOGI(TAG, "Allocate tensors");
@@ -99,7 +101,7 @@ void setModel() {
     ESP_LOGI(TAG, "Set output");
     output = interpreter->output(0);
 
-    ESP_LOGI(TAG, "Set inference_count");
+    // Keep track of how many inferences we have performed.
     inference_count = 0;
 }
 

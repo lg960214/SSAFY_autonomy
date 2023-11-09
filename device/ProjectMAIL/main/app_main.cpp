@@ -5,6 +5,8 @@
 #include "sensor.h"
 #include "matter_start.h"
 #include "ondevice_ai.h"
+#include "matter_start.h"
+#include "ondevice_ai.h"
 
 static const char* TAG = "app_main";
 
