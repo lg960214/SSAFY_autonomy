@@ -9,7 +9,7 @@
 #include "mbedtls/base64.h"
 
 static const char* TAG = "HTTP_CLIENT";
-#define MAX_HTTP_OUTPUT_BUFFER 100;
+#define MAX_HTTP_OUTPUT_BUFFER 100
 
 static void base64_decode_to_file(const char *base64_string, const char *file_path) {
     size_t output_size;
@@ -140,7 +140,7 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
 
 void get_ftlite_file(void)
 {
-    char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
+        char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
         .host = "http://43.201.16.59:8001/download/tflitefile/M16M/",
         .path = "/get",
@@ -193,7 +193,7 @@ void get_ftlite_file(void)
 
     // reset file
     ESP_LOGI(TAG, "Opening file");
-    FILE* f = fopen("/spiffs/model.ftlite", "w");
+    FILE* f = fopen("/spiffs/model.tflite", "w");
     if (f == NULL) {
         ESP_LOGE(TAG, "Failed to open file for writing");
         return;
@@ -230,7 +230,7 @@ void get_ftlite_file(void)
             // file write
 
             local_response_buffer[esp_http_client_get_content_length(client) - 1] = '\0';
-            const char *file_path = "/spiffs/model.ftlite";
+            const char *file_path = "/spiffs/model.tflite";
 
             base64_decode_to_file(&local_response_buffer[2], file_path);
 
