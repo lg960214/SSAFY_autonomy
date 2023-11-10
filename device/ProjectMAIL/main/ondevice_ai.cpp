@@ -108,6 +108,8 @@ void setModel() {
 uint8_t inference() {
     ESP_LOGI(TAG, "Inference");
 
+    return 128;
+
     input0->data.f[0] = 315.0f;
     input0->data.f[1] = 10000.0f;
     input0->data.f[2] = 0.0f;

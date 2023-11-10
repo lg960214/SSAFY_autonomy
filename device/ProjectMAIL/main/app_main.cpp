@@ -19,7 +19,7 @@ static const char* TAG = "app_main";
 
 bool g_AI_mode = false;
 bool g_model_update = false;
-SensorData g_sensor_data;
+Sensor g_sensor_data;
 uint8_t g_light_brightness;
 
 extern "C" void app_main(void)
@@ -28,12 +28,13 @@ extern "C" void app_main(void)
 
     // setting
     matter_start();
+    sensor_init();
     setModel();
     set_time();
 
     // main process
     get_sensor_data(&g_sensor_data);
-    if(g_AI_model) {
+    if(g_AI_mode) {
         g_light_brightness = inference();
         light_set_brightness(g_light_brightness);
     }
@@ -44,6 +45,10 @@ extern "C" void app_main(void)
     if(g_model_update) {
         // @ enduser0
         // TODO: Call update GET
+        int g_illuminance = 0;
+        int g_auto = 0;
+        int g_on = 1;
+        int g_brightness = 1000;
         send_sensor_data(g_illuminance, g_auto, g_on, g_brightness);
     }
 }

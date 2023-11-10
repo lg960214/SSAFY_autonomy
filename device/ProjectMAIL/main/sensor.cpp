@@ -13,7 +13,7 @@ int get_motion_detect_state(){
 }
 
 //조도 센서 config
-uint32_t get_illumi_value(){
+int get_illumi_value(){
     int illumi_value = adc1_get_raw(ADC1_CHANNEL_6); 
     return illumi_value;
 }

@@ -221,7 +221,6 @@ void get_ftlite_file(void)
         }
     }
 
-    file_read();
     esp_vfs_spiffs_unregister(NULL);
     esp_http_client_cleanup(client);
 }

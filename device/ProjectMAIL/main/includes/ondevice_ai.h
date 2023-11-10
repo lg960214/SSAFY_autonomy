@@ -11,4 +11,4 @@
 #include "model.h"
 
 void setModel();
-void inference();
+uint8_t inference();
