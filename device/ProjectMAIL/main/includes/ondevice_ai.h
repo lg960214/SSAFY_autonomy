@@ -8,7 +8,5 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
-#include "model.h"
-
 void setModel();
-void inference();
+uint8_t inference();
