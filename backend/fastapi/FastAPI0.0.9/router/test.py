@@ -1,3 +1,6 @@
-a = "03"
+import time
+from time import gmtime
 
-print(int(a))
+b = time.time()
+print(b)
+print(gmtime(b))

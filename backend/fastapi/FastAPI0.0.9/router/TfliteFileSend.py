@@ -12,8 +12,8 @@ def getTfliteFile(productionName, order):
     fileURL = f"/code/app/TfliteStorage/{productionName}"
     try :
         fHandler = open(fileURL, 'r')
-        fHandler.seek(int(order)*2044)
-        data = fHandler.read(2044)
+        fHandler.seek(int(order)*61)
+        data = fHandler.read(61)
         if data =="":
             print("End of File")
             return "1"
@@ -26,4 +26,4 @@ def getTfliteFile(productionName, order):
         return "2"
     else : 
         fHandler.close()
-    #return FileResponse(fileURL)   #-> 디버깅용
+      #return FileResponse(fileURL)   #-> 디버깅용

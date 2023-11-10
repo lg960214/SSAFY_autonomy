@@ -15,7 +15,6 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
 class SensorRawData(BaseModel):
-    YYYY : Union[int, None] = None
     MM : Union[int, None] = None
     DD : Union[int, None] = None
     HH : Union[int, None] = None
@@ -35,7 +34,7 @@ def postSensorData(productionName,sensorData: SensorRawData):
     try :
         print(sensorData)
 
-        p = influxdb_client.Point("SensorData").tag("Name", productionName).field("YYYY", sensorData.YYYY).field("MM",sensorData.MM).field("DD",sensorData.DD).field("HH",sensorData.HH).field("Min",sensorData.Min).field("Sec",sensorData.Sec).field("Day",sensorData.Day).field("Illuminance",sensorData.Illuminance).field("Manual",sensorData.Manual).field("Brightness",sensorData.Brightness).field("On",sensorData.On)
+        p = influxdb_client.Point("SensorData").tag("Name", productionName).field("MM",sensorData.MM).field("DD",sensorData.DD).field("HH",sensorData.HH).field("Min",sensorData.Min).field("Sec",sensorData.Sec).field("Day",sensorData.Day).field("Illuminance",sensorData.Illuminance).field("Manual",sensorData.Manual).field("Brightness",sensorData.Brightness).field("On",sensorData.On)
         write_api.write(bucket=bucket, record=p)
         print("Well Done")
      
