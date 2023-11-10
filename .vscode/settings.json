@@ -2,6 +2,10 @@
     "files.associations": {
         "array": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
-    }
+        "utility": "cpp",
+        "cstdint": "cpp",
+        "functional": "cpp",
+        "mutex": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/ssafy/S09P31A305/device/ProjectMAIL"
 }
