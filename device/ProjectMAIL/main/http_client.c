@@ -138,7 +138,7 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
     esp_http_client_cleanup(client);
 }
 
-void get_ftlite_file(void)
+void get_tflite_file(void)
 {
         char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
