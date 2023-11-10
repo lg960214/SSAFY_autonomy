@@ -6,8 +6,32 @@
 
 #include "esp_spiffs.h"
 
+#include "mbedtls/base64.h"
+
 static const char* TAG = "HTTP_CLIENT";
-#define MAX_HTTP_OUTPUT_BUFFER 70
+#define MAX_HTTP_OUTPUT_BUFFER 100;
+
+static void base64_decode_to_file(const char *base64_string, const char *file_path) {
+    size_t output_size;
+    mbedtls_base64_decode(NULL, 0, &output_size, (const unsigned char *)base64_string, strlen(base64_string));
+
+    uint8_t *binary_data = (uint8_t *)malloc(output_size);
+    mbedtls_base64_decode(binary_data, output_size, &output_size, (const unsigned char *)base64_string, strlen(base64_string));
+
+    FILE *file = fopen(file_path, "ab");
+    if (file == NULL) {
+        ESP_LOGE(TAG, "Failed to open file for writing");
+        free(binary_data);
+        return;
+    }
+
+    fwrite(binary_data, 1, output_size, file);
+    fclose(file);
+
+    ESP_LOGI(TAG, "Base64 decoded data written to file: %s", file_path);
+
+    free(binary_data);
+}
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -178,6 +202,7 @@ void get_ftlite_file(void)
 
     // data request start
     esp_err_t err = ESP_OK;
+
     while (err == ESP_OK && status_code == 0)
     {
         while (status_code == 0)
@@ -203,15 +228,12 @@ void get_ftlite_file(void)
                     esp_http_client_get_content_length(client));
             
             // file write
-            f = fopen("/spiffs/model.ftlite", "a");
-            if (f == NULL) {
-                ESP_LOGE(TAG, "Failed to open file for writing");
-                // 파일 손상
-                return;
-            }
+
             local_response_buffer[esp_http_client_get_content_length(client) - 1] = '\0';
-            fprintf(f, &local_response_buffer[2]);
-            fclose(f);
+            const char *file_path = "/spiffs/model.ftlite";
+
+            base64_decode_to_file(&local_response_buffer[2], file_path);
+
             status_code = local_response_buffer[1] - '0';
         }
         if (err != ESP_OK)
