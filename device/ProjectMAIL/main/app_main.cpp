@@ -5,8 +5,6 @@
 #include "sensor.h"
 #include "matter_start.h"
 #include "ondevice_ai.h"
-#include "matter_start.h"
-#include "ondevice_ai.h"
 
 // FAST server REST API
 extern "C" {
@@ -17,26 +15,21 @@ extern "C" {
 
 static const char* TAG = "app_main";
 
-bool g_AI_mode = false;
+bool g_AI_mode = true;
 bool g_model_update = false;
-SensorData g_sensor_data;
 uint8_t g_light_brightness;
+SensorData g_sensor_data;
 
 extern "C" void app_main(void)
 {
     ESP_LOGI(TAG, "Hello");
 
     // setting
-    matter_start();
+    // matter_start();
     setModel();
     set_time();
 
-    // main process
-    get_sensor_data(&g_sensor_data);
-    if(g_AI_model) {
-        g_light_brightness = inference();
-        light_set_brightness(g_light_brightness);
-    }
+    inference();
 
     // TODO: Call data POST
     get_ftlite_file();
