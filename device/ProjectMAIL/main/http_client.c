@@ -82,7 +82,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
+void send_sensor_data(int illuminance, bool is_auto, int brightness, struct tm t)
 {
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
@@ -94,11 +94,8 @@ void send_sensor_data(int illuminance, int is_auto, int is_on, int brightness)
     };
     esp_http_client_handle_t client = esp_http_client_init(&config);
 
-    time_t timer = time(NULL);
-    struct tm t;
-    localtime_r(&timer, &t);
-
     char post_data[250] =  { 0, };
+    int is_on = brightness? true : false;
     sprintf(post_data, "{\"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, illuminance, is_auto, brightness, is_on);
     esp_http_client_set_url(client, "http://43.201.16.59:8001/upload/sensor/M16M");
     esp_http_client_set_method(client, HTTP_METHOD_POST);
@@ -221,7 +218,6 @@ void get_ftlite_file(void)
         }
     }
 
-    file_read();
     esp_vfs_spiffs_unregister(NULL);
     esp_http_client_cleanup(client);
 }

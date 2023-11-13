@@ -18,7 +18,7 @@ uint32_t get_illumi_value(){
     return illumi_value;
 }
 
-void get_sensor_data(SensorData *s){
-    s->motion_state = get_motion_detect_state();
-    s->illumi_value = get_illumi_value();
-}
+// void get_sensor_data(SensorData *s){
+//     s->motion_state = get_motion_detect_state();
+//     s->illumi_value = get_illumi_value();
+// }
