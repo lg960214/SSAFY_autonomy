@@ -40,7 +40,6 @@ extern "C" void app_main(void)
     }
 
     // TODO: Call data POST
-    /
     int g_illuminance = 0;
     int g_auto = 0;
     int g_on = 1;
