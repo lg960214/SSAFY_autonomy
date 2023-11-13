@@ -79,11 +79,16 @@ void setModel() {
     output = interpreter->output(0);
 }
 
-uint8_t inference() {
-    input0->data.f[0] = 315.0;
-    input0->data.f[1] = 10000.0;
-    input0->data.f[2] = 0.0;
-    input0->data.f[3] = 892.0;
+uint8_t inference(int illuminance, bool is_auto, int brightness, int motion, struct tm t) {
+    /*
+    Input data
+    "MM", "DD", "Day", "HH", "Min", "Sec",
+    "Illuminance", "Movement", "Manual", "On"
+    */
+
+   int is_on = brightness? true : false;
+   int inputs[INPUT_SEQ_LEN] = {t.tm_mon + 1, t.tm_mday, t.tm_wday, t.tm_hour, t.tm_min, t.tm_sec, illuminance, motion, is_auto, is_on};
+   memcpy(input0->data.i32, inputs, sizeof(int) * INPUT_SEQ_LEN);
 
     interpreter->Invoke();
 

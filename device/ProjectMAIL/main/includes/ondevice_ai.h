@@ -9,4 +9,4 @@
 #include <esp_err.h>
 
 void setModel();
-uint8_t inference();
+uint8_t inference(int illuminance, bool is_auto, int brightness, int motion, struct tm t);
