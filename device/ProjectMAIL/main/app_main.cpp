@@ -31,7 +31,8 @@ extern "C" void app_main(void)
 
 // setting
     matter_start();
-    setModel();
+    sensor_init();
+    //setModel();
     set_time();
     sensor_init();
 

@@ -14,6 +14,6 @@
 // };
 
 int get_motion_detect_state();
-uint32_t get_illumi_value();
+int get_illumi_value();
 void sensor_init();
 // void get_sensor_data(SensorData*);
