@@ -36,26 +36,33 @@ extern "C" void app_main(void)
     set_time();
 
     // Main process
-    // while(true) {
+    TickType_t xLastWakeTime;
+    const TickType_t xPeriod = pdMS_TO_TICKS(1000);
+    while(true) {
+
+        xLastWakeTime = xTaskGetTickCount();
+        timer = time(NULL);
         localtime_r(&timer, &g_time);
+        ESP_LOGI(TAG, "mon: %d, sec: %d, wday: %d, hour: %d", g_time.tm_mon, g_time.tm_sec, g_time.tm_wday, g_time.tm_hour);
+
+        if(g_model_update) {
+            get_tflite_file();
+            setModel();
+            g_model_update = false;
+        }
 
         // get sensor data
         g_motion = get_motion_detect_state();
         g_illuminance = get_illumi_value();
+        g_light_brightness = light_get_brightness();
         
         if(g_AI_mode) {
-            // g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
+            g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
             light_set_brightness(g_light_brightness);
         }
 
         send_sensor_data(g_illuminance, g_AI_mode, g_light_brightness, g_time);
-        
-        if(g_model_update) {
-            get_tflite_file();
-            setModel();
-        }
-
-        g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
-        light_set_brightness(g_light_brightness);
-    // } // main while loop
+        // vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelayUntil(&xLastWakeTime, xPeriod);
+    }
 }

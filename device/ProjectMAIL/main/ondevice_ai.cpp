@@ -87,13 +87,13 @@ uint8_t inference(int illuminance, bool is_auto, int brightness, int motion, str
     */
 
     int is_on = brightness? true : false;
-    float inputs[INPUT_SEQ_LEN] = {t.tm_mon + 1, t.tm_mday, t.tm_wday, t.tm_hour, t.tm_min, t.tm_sec, illuminance, motion, is_auto, is_on};
-    memcpy(input0->data.i32, inputs, sizeof(int) * INPUT_SEQ_LEN);
+    float inputs[INPUT_SEQ_LEN] = {(float)t.tm_mon + 1, (float)t.tm_mday, (float)t.tm_wday, (float)t.tm_hour, (float)t.tm_min, (float)t.tm_sec, (float)illuminance, (float)motion, (float)is_auto, (float)is_on};
+    memcpy(input0->data.i32, inputs, sizeof(float) * INPUT_SEQ_LEN);
 
     interpreter->Invoke();
 
     uint8_t result = (uint8_t)output->data.f[0];
-    if(result < 10) result = 0;
+    // if(result < 10) result = 0;
 
     ESP_LOGI(TAG, "Inferred %u", result);
     return result;

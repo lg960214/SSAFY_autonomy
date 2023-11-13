@@ -129,6 +129,7 @@ void send_sensor_data(int illuminance, bool is_auto, int brightness, struct tm t
     ESP_LOGI(TAG, "Post Sensor Data");
     if (err == ESP_OK) {
         ESP_LOGI(TAG, "HTTP POST Status = %d", esp_http_client_get_status_code(client));
+        ESP_LOGI(TAG, "HTTP data = %s", post_data);
     } else {
         ESP_LOGI(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
     }
