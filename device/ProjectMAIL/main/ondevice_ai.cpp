@@ -31,7 +31,7 @@ void setModel() {
     esp_vfs_spiffs_conf_t conf = {
       .base_path = "/spiffs",
       .partition_label = NULL,
-      .max_files = 5,
+      .max_files = 1,
       .format_if_mount_failed = true
     };
 
@@ -55,7 +55,7 @@ void setModel() {
     // closedir(dir);
 
     // Read the .tflite model from SPIFFS
-    FILE* file = fopen("/spiffs/model_low2.tflite", "rb");
+    FILE* file = fopen("/spiffs/model.tflite", "rb");
     if (file == NULL) {
         ESP_LOGE("SPIFFS", "Failed to open model file");
         return;
@@ -107,8 +107,6 @@ void setModel() {
 
 uint8_t inference() {
     ESP_LOGI(TAG, "Inference");
-
-    return 128;
 
     input0->data.f[0] = 315.0f;
     input0->data.f[1] = 10000.0f;

@@ -18,7 +18,7 @@ extern "C" {
 static const char* TAG = "app_main";
 
 bool g_AI_mode = false;
-bool g_model_update = false;
+bool g_model_update = true;
 Sensor g_sensor_data;
 uint8_t g_light_brightness;
 
@@ -29,7 +29,7 @@ extern "C" void app_main(void)
     // setting
     matter_start();
     sensor_init();
-    setModel();
+    //setModel();
     set_time();
 
     // main process
@@ -40,15 +40,19 @@ extern "C" void app_main(void)
     }
 
     // TODO: Call data POST
-    get_tflite_file();
+    /
+    int g_illuminance = 0;
+    int g_auto = 0;
+    int g_on = 1;
+    int g_brightness = 1000;
+    send_sensor_data(g_illuminance, g_auto, g_on, g_brightness);
     
+    // TODO: Call update GET
     if(g_model_update) {
-        // @ enduser0
-        // TODO: Call update GET
-        int g_illuminance = 0;
-        int g_auto = 0;
-        int g_on = 1;
-        int g_brightness = 1000;
-        send_sensor_data(g_illuminance, g_auto, g_on, g_brightness);
+		get_tflite_file();
+		setModel();
     }
+
+	g_light_brightness = inference();
+	ESP_LOGI(TAG, "bright: %d", g_light_brightness);
 }
