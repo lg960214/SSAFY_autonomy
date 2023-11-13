@@ -16,7 +16,7 @@ extern "C" {
 static const char* TAG = "app_main";
 
 bool g_AI_mode = true; // AI 모드인가?
-bool g_model_update = false; // model update가 필요한가?
+bool g_model_update = true; // model update가 필요한가?
 time_t timer; // device time
 struct tm g_time; // device time 유지용
 int g_motion; // 움직임 value
@@ -34,10 +34,9 @@ extern "C" void app_main(void)
     sensor_init();
     //setModel();
     set_time();
-    sensor_init();
 
     // Main process
-    while(true) {
+    // while(true) {
         localtime_r(&timer, &g_time);
 
         // get sensor data
@@ -45,16 +44,18 @@ extern "C" void app_main(void)
         g_illuminance = get_illumi_value();
         
         if(g_AI_mode) {
-            g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
-            // @hon3538
-            // Update Attribute
+            // g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
+            light_set_brightness(g_light_brightness);
         }
 
         send_sensor_data(g_illuminance, g_AI_mode, g_light_brightness, g_time);
         
         if(g_model_update) {
-            get_ftlite_file();
+            get_tflite_file();
             setModel();
         }
-    } // main while loop
+
+        g_light_brightness = inference(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
+        light_set_brightness(g_light_brightness);
+    // } // main while loop
 }

@@ -86,9 +86,9 @@ uint8_t inference(int illuminance, bool is_auto, int brightness, int motion, str
     "Illuminance", "Movement", "Manual", "On"
     */
 
-   int is_on = brightness? true : false;
-   int inputs[INPUT_SEQ_LEN] = {t.tm_mon + 1, t.tm_mday, t.tm_wday, t.tm_hour, t.tm_min, t.tm_sec, illuminance, motion, is_auto, is_on};
-   memcpy(input0->data.i32, inputs, sizeof(int) * INPUT_SEQ_LEN);
+    int is_on = brightness? true : false;
+    float inputs[INPUT_SEQ_LEN] = {t.tm_mon + 1, t.tm_mday, t.tm_wday, t.tm_hour, t.tm_min, t.tm_sec, illuminance, motion, is_auto, is_on};
+    memcpy(input0->data.i32, inputs, sizeof(int) * INPUT_SEQ_LEN);
 
     interpreter->Invoke();
 
