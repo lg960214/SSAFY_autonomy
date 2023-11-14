@@ -15,7 +15,6 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 
 
 class SensorRawData(BaseModel):
-    YYYY : Union[int, None] = None
     MM : Union[int, None] = None
     DD : Union[int, None] = None
     HH : Union[int, None] = None
@@ -35,7 +34,7 @@ def postSensorData(productionName,sensorData: SensorRawData):
     try :
         print(sensorData)
 
-        p = influxdb_client.Point("SensorData").tag("Name", productionName).field("YYYY", sensorData.YYYY).field("MM",sensorData.MM).field("DD",sensorData.DD).field("HH",sensorData.HH).field("Min",sensorData.Min).field("Sec",sensorData.Sec).field("Day",sensorData.Day).field("Illuminance",sensorData.Illuminance).field("Manual",sensorData.Manual).field("Brightness",sensorData.Brightness).field("On",sensorData.On)
+        p = influxdb_client.Point("SensorData").tag("Name", productionName).field("MM",sensorData.MM).field("DD",sensorData.DD).field("HH",sensorData.HH).field("Min",sensorData.Min).field("Sec",sensorData.Sec).field("Day",sensorData.Day).field("Illuminance",sensorData.Illuminance).field("Manual",sensorData.Manual).field("Brightness",sensorData.Brightness).field("On",sensorData.On)
         write_api.write(bucket=bucket, record=p)
         
 
@@ -50,9 +49,11 @@ def postSensorData(productionName,sensorData: SensorRawData):
             for record in table.records:
                 print(record.get_field(),record.get_value())
      
-
+        
         return "OK"
-    except :
+    except Exception as ex :
+        errMsg = traceback.format_exc()
+        print(errMsg)
         return "Not Good"
 #    p = influxdb_client.Point("CommuTest").tag("data", "esp32").field("string", item.data)
 #    write_api.write(bucket=bucket, record=p)
