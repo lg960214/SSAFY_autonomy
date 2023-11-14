@@ -6,7 +6,7 @@
 #include "esp_adc_cal.h"
 
 #define MOTION_SENSOR_GPIO GPIO_NUM_14
-#define IllUMINANCE_SENSOR_GPIO GPIO_NUM_27
+#define IllUMINANCE_SENSOR_GPIO GPIO_NUM_34
 
 // typedef struct SensorData {
 //     int motion_state;

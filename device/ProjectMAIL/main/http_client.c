@@ -110,7 +110,7 @@ void send_sensor_data(int illuminance, bool is_auto, int brightness, struct tm t
 {
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
-        .url = "http://43.201.16.59:8001/upload/sensor/1",
+        .url = "http://13.125.12.50:8002/upload/sensor/1",
         .path = "/get",
         .query = "esp",
         .event_handler = _http_event_handler,
@@ -121,7 +121,7 @@ void send_sensor_data(int illuminance, bool is_auto, int brightness, struct tm t
     char post_data[250] =  { 0, };
     int is_on = brightness? true : false;
     sprintf(post_data, "{\"MM\" : \"%d\", \"DD\" : \"%d\", \"HH\" : \"%d\", \"Min\" : \"%d\", \"Sec\" : \"%d\", \"Day\" : \"%d\", \"Illuminance\" : \"%d\", \"Manual\" : \"%d\", \"Brightness\" : \"%d\", \"On\" : \"%d\"}", t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, t.tm_wday, illuminance, is_auto, brightness, is_on);
-    esp_http_client_set_url(client, "http://43.201.16.59:8001/upload/sensor/M16M");
+    esp_http_client_set_url(client, "http://13.125.12.50:8002/upload/sensor/M16M");
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_header(client, "Content-Type", "application/json");
     esp_http_client_set_post_field(client, post_data, strlen(post_data));
@@ -140,7 +140,7 @@ void get_tflite_file(void)
 {
         char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
     esp_http_client_config_t config = {
-        .host = "http://43.201.16.59:8001/download/tflitefile/M16M/",
+        .host = "http://13.125.12.50:8002/download/tflitefile/M16M/",
         .path = "/get",
         .query = "esp",
         .event_handler = _http_event_handler,

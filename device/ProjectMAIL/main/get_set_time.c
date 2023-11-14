@@ -24,7 +24,7 @@ void set_time(void)
     char local_response_buffer[MAX_HTTP_OUTPUT_BUFFER] = {0};
 
     esp_http_client_config_t config = {
-        .url = "http://43.201.16.59:8001/MaiL/gettime",
+        .url = "http://13.125.12.50:8002/MaiL/gettime",
         .path = "/get",
         .query = "esp",
         .event_handler = _http_event_handler,

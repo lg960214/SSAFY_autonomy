@@ -6,6 +6,7 @@ using namespace esp_matter;
 static const char *TAG = "light_control";
 extern uint16_t light_endpoint_id;
 extern app_driver_handle_t light_handle;
+extern bool is_smartthings_action;
 /* Do any conversions/remapping for the actual value here */
 
 esp_err_t light_set_power(bool power)
@@ -21,7 +22,9 @@ esp_err_t light_set_power(bool power)
     val.val.b = power;
 
     err = led_driver_set_power(light_handle, power);
+    is_smartthings_action = false;
     attribute::update(1, *cluster_id, *attribute_id, &val);    
+    is_smartthings_action = true;
     return err;
 }                         
 
@@ -39,7 +42,9 @@ esp_err_t light_set_brightness(uint8_t target) // 0~255
     int value = REMAP_TO_RANGE(val.val.u8, MATTER_BRIGHTNESS, STANDARD_BRIGHTNESS);
 
     err = led_driver_set_brightness(light_handle, value);
-    attribute::update(1, *cluster_id, *attribute_id, &val);   
+    is_smartthings_action = false;
+    attribute::update(1, *cluster_id, *attribute_id, &val); 
+    is_smartthings_action = true;  
     return err;
 }
 
@@ -67,3 +72,11 @@ int8_t light_get_brightness()
     return val.val.u8;
 }
 
+void led_after_model_update(){
+    for(int i = 0; i < 5; i++){
+        light_set_brightness(255);
+        sleep(0.5);
+        light_set_brightness(255);
+        sleep(0.5);
+    }
+}

@@ -21,7 +21,8 @@ using namespace esp_matter;
 using namespace esp_matter::cluster;
 static const char *TAG = "app_driver";
 extern uint16_t light_endpoint_id;
-
+extern bool g_AI_mode;
+extern bool is_smartthings_action;
 /* Do any conversions/remapping for the actual value here */
 static esp_err_t app_driver_light_set_power(led_driver_handle_t handle, esp_matter_attr_val_t *val)
 {
@@ -40,6 +41,11 @@ esp_err_t app_driver_attribute_update(app_driver_handle_t driver_handle, uint16_
     esp_err_t err = ESP_OK;
     if (endpoint_id == light_endpoint_id) {
         led_driver_handle_t handle = (led_driver_handle_t)driver_handle;
+        if(is_smartthings_action){
+            g_AI_mode=false;
+            ESP_LOGW(TAG, "AI mode to false ");
+        }
+        
         if (cluster_id == OnOff::Id) {
             if (attribute_id == OnOff::Attributes::OnOff::Id) {
                 // ESP_LOGW(TAG, "Light OnOff Attribute Changed! ");
