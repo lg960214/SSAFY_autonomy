@@ -21,7 +21,8 @@ class MinioClient():
         else:
             self.client.make_bucket(bucket_name)        
             print(f"{bucket_name} created")
-
+    def get_object(self, bucket_name, object_name, file_name):
+        self.client.fget_object(bucket_name, object_name, file_name)
     # fput_object 함수를 활용해 업로드
     def upload_file(self, bucket, minio_path, local_path):
         self.client.fput_object(bucket, minio_path, local_path)
@@ -51,14 +52,14 @@ def getTfliteFile(productionName, order):
     fileURL = f"/code/app/TfliteStorage/{productionName}.tflite"
     try :
         if int(order) == 0:
-            minioClient.fget_object("MaiL", f"{productionName}", f"/code/app/TfliteStorage/{productionName}.tflite")
+            minioClient.get_object("mail", f"{productionName}.tflite", fileURL)
         data = b""
         with open(fileURL, 'rb') as fHandler:
             fHandler.seek(int(order)*60)
             data = fHandler.read(60)
         if data == b"":
             print("End of File")
-            subprocess.run(['rm',f'/code/app/TfliteStorage/{productionName}.tflite'])
+            subprocess.run(['rm',fileURL])
             return "1"
 
         result = "0" + base64.b64encode(data).decode('utf-8') 
