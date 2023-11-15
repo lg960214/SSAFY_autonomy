@@ -71,7 +71,7 @@ extern "C" void app_main(void)
                 light_set_brightness(g_light_brightness);
         }
 
-        send_sensor_data(g_illuminance, g_AI_mode, g_light_brightness, g_time);
+        send_sensor_data(g_illuminance, g_AI_mode, g_light_brightness, g_motion, g_time);
         // vTaskDelay(pdMS_TO_TICKS(1000));
         vTaskDelayUntil(&xLastWakeTime, xPeriod);
     }
