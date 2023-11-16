@@ -46,7 +46,7 @@ extern "C" void app_main(void)
         localtime_r(&timer, &g_time);
 
         // 00:00시가 되면
-        if(g_time.tm_min ==0  && g_time.tm_sec== 0) g_model_update = true;
+        if(g_time.tm_min == 0  && g_time.tm_sec== 0) g_model_update = true;
         
         if(g_model_update) {
             get_tflite_file();
