@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "cstdint": "cpp",
+        "functional": "cpp",
+        "mutex": "cpp",
+        "http_client.h": "c"
+    },
+    "cmake.sourceDirectory": "/home/ssafy/S09P31A305/device/ProjectMAIL"
+}
