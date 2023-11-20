@@ -199,10 +199,9 @@ Matter protocol을 활용한 On-device AI 조명 개발
 5. *커밋 메시지(Commit Message)**는 합의한 **커밋 컨벤션(Commit Convention)**에 따라 최대한 상세하게 작성합니다.
 6. 깃 브랜치(Branch) 규칙에 따라 브랜치를 관리하고, 모든 작업은 올바른 브랜치에서 작업해야 합니다.
 
-</details>
 
-<details>
-<summary>🥈 생활 수칙</summary>
+
+🥈 생활 수칙
 
 ### 💻 개인 일정 관리 및 연락
 
@@ -217,7 +216,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
 
 
 
-AI model update
+### { AI model update }
 
 **[ 시연 기능 - model update ]**
 
