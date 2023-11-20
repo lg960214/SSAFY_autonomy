@@ -1,0 +1,58 @@
+name: GetData
+inputs:
+- {name: bucket, type: String}
+implementation:
+  container:
+    image: python:3.7
+    command:
+    - sh
+    - -c
+    - (PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet --no-warn-script-location
+      'pandas' 'influxdb_client' || PIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip
+      install --quiet --no-warn-script-location 'pandas' 'influxdb_client' --user)
+      && "$0" "$@"
+    - sh
+    - -ec
+    - |
+      program_path=$(mktemp)
+      printf "%s" "$0" > "$program_path"
+      python3 -u "$program_path" "$@"
+    - |
+      def getData(bucket):
+          import pandas as pd
+          import influxdb_client
+          import os
+
+          config_path = "/mnt/data/config.ini"
+
+          retDf = pd.DataFrame()
+          colName = []
+          client = influxdb_client.InfluxDBClient.from_config_file(config_path)
+          query_api = client.query_api()
+          query = f'from(bucket:"{bucket}")\
+          |> range(start:-1d)\
+          |> filter(fn:(r)=> r._measurement=="SensorData" and r.Name=="M16M")'
+
+          result = query_api.query(query=query)
+
+          for table in result:
+              col = table.records[0].get_field()
+              colName.append(col)
+              temp = []
+              for record in table.records:
+                  temp.append((int(record.get_value())))
+              retDf[col] = temp
+
+          retDf = retDf[["MM", "DD", "Day", "HH", "Min", "Sec",
+          "Illuminance", "Movement", "Manual", "On",
+           "Brightness"]]
+
+      import argparse
+      _parser = argparse.ArgumentParser(prog='GetData', description='')
+      _parser.add_argument("--bucket", dest="bucket", type=str, required=True, default=argparse.SUPPRESS)
+      _parsed_args = vars(_parser.parse_args())
+
+      _outputs = getData(**_parsed_args)
+    args:
+    - --bucket
+    - {inputValue: bucket}

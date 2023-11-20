@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: pvc-data-manipulation-pipeline-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.6.3, pipelines.kubeflow.org/pipeline_compilation_time: '2023-11-15T01:04:00.597687',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "A pipeline that puts and
+      retrieves data from a pre-existing PVC.", "inputs": [{"name": "pvc_name", "type":
+      "String"}], "name": "PVC Data Manipulation Pipeline"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.6.3}
+spec:
+  entrypoint: pvc-data-manipulation-pipeline
+  templates:
+  - name: get-data-task
+    container:
+      args: [cat /mnt/data/data.txt]
+      command: [sh, -c]
+      image: busybox
+      volumeMounts:
+      - {mountPath: /mnt/data, name: pvolume-e819e39f92a888af338a32082ea85feaa488e4a0aabfacc858d718b}
+    inputs:
+      parameters:
+      - {name: pvc_name}
+    metadata:
+      labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.6.3, pipelines.kubeflow.org/pipeline-sdk-type: kfp}
+    volumes:
+    - name: pvolume-e819e39f92a888af338a32082ea85feaa488e4a0aabfacc858d718b
+      persistentVolumeClaim: {claimName: '{{inputs.parameters.pvc_name}}'}
+  - name: put-data-task
+    container:
+      args: ['echo "Hello, PVC!" > /mnt/data/data.txt']
+      command: [sh, -c]
+      image: busybox
+      volumeMounts:
+      - {mountPath: /mnt/data, name: pvolume-e819e39f92a888af338a32082ea85feaa488e4a0aabfacc858d718b}
+    inputs:
+      parameters:
+      - {name: pvc_name}
+    metadata:
+      labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.6.3, pipelines.kubeflow.org/pipeline-sdk-type: kfp}
+    volumes:
+    - name: pvolume-e819e39f92a888af338a32082ea85feaa488e4a0aabfacc858d718b
+      persistentVolumeClaim: {claimName: '{{inputs.parameters.pvc_name}}'}
+  - name: pvc-data-manipulation-pipeline
+    inputs:
+      parameters:
+      - {name: pvc_name}
+    dag:
+      tasks:
+      - name: get-data-task
+        template: get-data-task
+        arguments:
+          parameters:
+          - {name: pvc_name, value: '{{inputs.parameters.pvc_name}}'}
+      - name: put-data-task
+        template: put-data-task
+        arguments:
+          parameters:
+          - {name: pvc_name, value: '{{inputs.parameters.pvc_name}}'}
+  arguments:
+    parameters:
+    - {name: pvc_name}
+  serviceAccountName: pipeline-runner
