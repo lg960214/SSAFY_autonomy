@@ -142,18 +142,17 @@ Matter protocol을 활용한 On-device AI 조명 개발
 ### 아키텍처
 
 **임베디드 & 서비스**
-![Untitled (9)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/7387ed99-5115-4524-9101-82917e07c7fd)
-
-
+![Untitled (9)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/7387ed99-5115-4524-9101-82917e07c7fd)  
+  
+  
 **서버**
-![Untitled (10)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/289cd7a7-3314-421b-8e20-af33e23d1ff2)
-
-
+![Untitled (10)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/289cd7a7-3314-421b-8e20-af33e23d1ff2)  
+  
+  
 **MLOps**
-![Untitled (11)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/eb063656-df0f-4e29-b426-941d1e29b41d)
-
-
-
+![Untitled (11)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/eb063656-df0f-4e29-b426-941d1e29b41d)  
+  
+  
 ## 그라운드 룰
 
 ### 1. Perforce Commit Convention
@@ -215,9 +214,6 @@ Matter protocol을 활용한 On-device AI 조명 개발
 ### 시연 영상
 
 ![ezgif com-resize](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/9eb60a04-3fde-46aa-9a79-74765e0e99a1)
-
-
-### { AI model update }
 
 
 
