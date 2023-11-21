@@ -114,7 +114,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
 
 - AI 모드를 사용한 전등 밝기 조절
 - 수동 모드를 사용한 전등 밝기 조절
-- 새로운 AI 학습 모델 업데이트
+- MLOps를 활용한 새로운 AI 학습 모델 업데이트
 
 # 3. PROJECT
 
