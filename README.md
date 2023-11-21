@@ -2,12 +2,12 @@
 
 # 1. TEAM
 
-### 팀 소개
+## 팀 소개
 ![Untitled (8)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/8de63d45-70cc-4700-a902-b2e75d60000d)
 
 # 2. Introduction
 
-### 개요
+## 개요
 
 | 팀명 | WebX |
 | --- | --- |
@@ -15,11 +15,11 @@
 | 프로젝트 진행기간 | 2023.10.09 - 2023.11.20 |
 | 개발 인원 | 6명 |
 
-### 프로젝트 소개
+## 프로젝트 소개
 
 Matter protocol을 활용한 On-device AI 조명 개발
 
-### 기술 스택
+## 기술 스택
 
 <div align=center><h1>🛠️ STACKS</h1></div>
 
@@ -110,7 +110,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
     - Kubeflow를 활용하여 AI experiment를 위한 인프라 구축
     - Continuous Training 구현 및 Trigger에 의한 Pipeline 배포 자동화
 
-### 주요 기능 & 핵심 기술
+## 주요 기능 & 핵심 기술
 
 - AI 모드를 사용한 전등 밝기 조절
 - 수동 모드를 사용한 전등 밝기 조절
@@ -118,7 +118,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
 
 # 3. PROJECT
 
-### 사용기술
+## 사용기술
 
 | 임베디드 | 서버 | 인프라 | 인공지능 | 협업 |
 | --- | --- | --- | --- | --- |
@@ -127,7 +127,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
 | FreeRTOS | nginx (reverse proxy) | Kubeflow | pandas | Notion |
 | Tensorflow lite<br>for Microcontroller |  | Minio | scikitlearn | Mattermost |
 
-### API 명세서
+## API 명세서
 
 앞에 `http://[공인IP]:[포트]` 는 공통, `test용 productionName : M16M, Nginx 포트 : 8002`
 
@@ -139,17 +139,17 @@ Matter protocol을 활용한 On-device AI 조명 개발
 | getTfliteFile | 학습파일 다운로드.<br><br>상세<br>서버측에서는 minio 객체 스토리지에 결과물이 나왔나 확인 후, 존재하면 60byte씩 읽어서 전송.<br>클라이언트 측에서 여러번 요청해야함 | `/download/tflitefile/{productionName}/{order}` | GET | productionNameorder |                                                                                                          | 정상<br><br>파일 전송 시<br>return “0”+ data<br>전송 완료 시<br>return “1”<br><br>오류 시<br><br>minio에 파일이 없을시<br>return “2” | finish byte 앞에 설정<br>0 : 데이터 보내는 중<br>1 : 다 보냄<br>2 : 보낼 데이터 자체가 없음<br><br>데이터는 실행파일이므로 base64로 인코딩후 utf-8로 디코딩하여 전송 |
 | getTimeFile | 시간 정보 수신 | /MaiL/gettime | GET |  |  | 정상<br><br>return int(time.time())<br><br>오류 시<br><br>return 1 | Unix timestamp값으로 리턴 |
 
-### 아키텍처
+## 아키텍처
 
-#### **임베디드 & 서비스**
+### **임베디드 & 서비스**  
 ![Untitled (9)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/7387ed99-5115-4524-9101-82917e07c7fd)  
   
   
-#### **서버**
+### **서버**  
 ![Untitled (10)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/289cd7a7-3314-421b-8e20-af33e23d1ff2)  
   
   
-#### **MLOps**
+### **MLOps**  
 ![Untitled (11)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/eb063656-df0f-4e29-b426-941d1e29b41d)  
   
   
@@ -166,7 +166,7 @@ Matter protocol을 활용한 On-device AI 조명 개발
 | 📝 | test | 테스트 코드 작성 | 테스트를 진행 및 완성에 작성 |
 |  |  |  |  |
 
-### 2. 기타 협업 관련
+## 2. 기타 협업 관련
 
 ### 💻 회의 진행
 
