@@ -214,9 +214,12 @@ Matter protocol을 활용한 On-device AI 조명 개발
 
 ### 시연 영상
 
+![ezgif com-resize](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/9eb60a04-3fde-46aa-9a79-74765e0e99a1)
 
 
 ### { AI model update }
+
+
 
 **[ 시연 기능 - model update ]**
 
