@@ -144,9 +144,9 @@ Matter protocol을 활용한 On-device AI 조명 개발
 **임베디드 & 서비스**
 ![Untitled (9)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/7387ed99-5115-4524-9101-82917e07c7fd)
 
+
 **서버**
 ![Untitled (10)](https://github.com/lg960214/SSAFY_autonomy/assets/46098797/289cd7a7-3314-421b-8e20-af33e23d1ff2)
-
 
 
 **MLOps**
